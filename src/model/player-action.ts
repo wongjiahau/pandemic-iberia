@@ -1,9 +1,9 @@
 import { PlayerCard } from './cards';
-import { PlayerName } from './player';
 import { CityName, City } from './cities';
+import { Player } from './player';
 
 export type PlayerAction = {
-  playerName: PlayerName
+  playerName: Player['name']
 } & ({
   type: 'move'
   by:  'carriage/boat' | 'train' | 'ship'
@@ -18,8 +18,8 @@ export type PlayerAction = {
 } | {
   type: 'share knowledge'
   on: CityName
-  from: PlayerName
-  to: PlayerName
+  from: Player['name']
+  to: Player['name']
 } | {
   type: 'research disease'
   color: City['color']

@@ -23,9 +23,9 @@ export type Game = {
   playerDeck: PlayerCard[]
   playerDiscardPile: PlayerCard[]
   cities: City[]
-  patients: {
+  infectedCities: {
     cityName: CityName, 
-    cubes: City['color'][]
+    patients: City['color'][]
   }[]
   railRoads: {
     between: [CityName, CityName]

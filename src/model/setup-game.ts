@@ -50,10 +50,10 @@ export const setupGame = (): Game => {
   const third3InfectionCards = infectionDeck.slice(6, 9)
   const remainingInfectionCards = infectionDeck.slice(9)
 
-  const getPatient = (numberOfCubes: number) => (infectionCard: InfectionCard): Game['patients'][0] => {
+  const getPatient = (numberOfCubes: number) => (infectionCard: InfectionCard): Game['infectedCities'][0] => {
     return {
       cityName: infectionCard.cityName,
-      cubes: new Array(numberOfCubes).fill(0)
+      patients: new Array(numberOfCubes).fill(0)
         .map(() => infectionCard.cityColor)
     }
   }
@@ -76,7 +76,7 @@ export const setupGame = (): Game => {
     playerDeck: remaningPlayerCardsWithEpidemicCards,
     playerDiscardPile: [],
     cities,
-    patients: [
+    infectedCities: [
       ...first3InfectionCards.map(getPatient(3)),
       ...second3InfectionCards.map(getPatient(2)),
       ...third3InfectionCards.map(getPatient(1))

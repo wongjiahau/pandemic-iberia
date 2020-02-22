@@ -1,12 +1,12 @@
-import { PlayerName } from "./player";
+import { Player } from './player';
 import { City } from "./cities";
 
 export type AutomatedAction = {
   type: 'draw 2 player cards'
-  playerName: PlayerName
+  playerName: Player['name']
 } | {
   type: 'infect cities'
-  cityName: PlayerName
+  cityName: City['name']
   cubes: City['color'][]
 } | {
   type: 'epidemic'

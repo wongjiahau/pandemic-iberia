@@ -13,5 +13,5 @@ export const validateAction = ({
   type: 'fail'
   message: string
 } => {
-
+  throw new Error(`Not implemented`)
 }

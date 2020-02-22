@@ -1,3 +1,4 @@
+import { updateArray } from './../util/array';
 import { Game } from "../model/game";
 import { Action } from "../model/action";
 
@@ -40,20 +41,26 @@ export const executeAction = ({
       return {
         ...game,
         playerDeck: game.playerDeck.slice(2),
-        playerCards: {
-          ...game.playerCards,
-          [action.playerName]: [...(game.playerCards[action.playerName] ?? []), ...game.playerDeck.slice(0, 2)]
-        }
+        playerCards: updateArray({
+          array: game.playerCards,
+          match: playerCard => playerCard.playerName === action.playerName,
+          update: playerCard => ({...playerCard, cards: [...playerCard.cards, ...game.playerDeck.slice(0, 2)]}),
+          upsert: undefined
+        })
       }
     }
     case 'infect cities': {
       return {
         ...game,
-        patients: {
-          ...game.patients,
-          [action.cityName]: [...(game.patients[action.cityName] ?? []), ...action.cubes]
-        }
+        infectedCities: updateArray({
+          array: game.infectedCities,
+          match: patient => patient.cityName === action.cityName,
+          update: patient => ({...patient, cubes: [...action.cubes]}),
+          upsert: {cityName: action.cityName, patients: action.cubes}
+        })
       }
     }
+    default:
+      throw new Error(`Cannot handle ${action.type} yet`)
   }
 }

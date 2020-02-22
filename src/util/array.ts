@@ -12,7 +12,7 @@ export const updateArray = <T>({
    * Value to be appended to the array if no element return true 
    * for the `match` function
    */
-  upsert: T
+  upsert: T | undefined
 }): T[] => {
   return [
     ...array.map((element, index) => {
@@ -25,6 +25,6 @@ export const updateArray = <T>({
     }),
     ...array.some(match)
       ? []
-      : [upsert]
+      : upsert ? [upsert] : []
   ]
 }

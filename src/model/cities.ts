@@ -2,7 +2,7 @@ export type City = {
   color: 'red' | 'blue' | 'yellow' | 'black'
   name: CityName
   connectedTo: CityName[]
-  isPort: boolean
+  isPort?: boolean
 }
 export type CityName 
   = 'A Coruna'
@@ -54,7 +54,7 @@ export type CityName
 
 export const cities: City[] = [
   {color: 'blue', name: 'A Coruna', connectedTo: ['Santiago De Compostela', 'Gijon'], isPort: true},
-  {color: 'blue', name: 'Santiago De Compostela', connectedTo: ['A Coruna', 'Vigo', 'Ourense'], isPort: false},
+  {color: 'blue', name: 'Santiago De Compostela', connectedTo: ['A Coruna', 'Vigo', 'Ourense']},
   {color: 'blue', name: 'Vigo', connectedTo: ['Santiago De Compostela', 'Porto', 'Ourense', 'Braga'], isPort: true},
-  {color: 'blue', name: 'Ourense', connectedTo: ['Santiago De Compostela', 'Vigo', 'Leon'], isPort: false}
+  {color: 'blue', name: 'Ourense', connectedTo: ['Santiago De Compostela', 'Vigo', 'Leon']},
 ]

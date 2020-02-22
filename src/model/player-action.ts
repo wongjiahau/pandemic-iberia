@@ -1,6 +1,10 @@
+import { PlayerCard } from './cards';
 import { PlayerName } from './player';
 import { CityName, City } from './cities';
+
 export type PlayerAction = {
+  playerName: PlayerName
+} & ({
   type: 'move'
   by:  'carriage/boat' | 'train' | 'ship'
   from: CityName
@@ -23,4 +27,7 @@ export type PlayerAction = {
   type: 'purify water'
   discardedCityCard: CityName
   affectedCities: CityName[]
-}
+} | {
+  type: 'discard card'
+  card: PlayerCard
+})

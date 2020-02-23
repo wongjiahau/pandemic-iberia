@@ -3,7 +3,7 @@ import { Game } from "../model/game";
 import { Action } from "../model/action";
 
 export const executeAction = (action: Action) => (game: Game): Game => {
-  const updateTurn = (): Game['currentPlayer'] => {
+  const updateCurrentPlayer = (): Game['currentPlayer'] => {
     const currentPlayerIndex = game.players.findIndex(player => player.name === game.currentPlayer.name)
     const nextPlayer = game.players[(currentPlayerIndex + 1) % game.players.length]
     return game.currentPlayer.turn === 3
@@ -25,7 +25,7 @@ export const executeAction = (action: Action) => (game: Game): Game => {
     case 'move': {
       return {
         ...game,
-        currentPlayer: updateTurn(),
+        currentPlayer: updateCurrentPlayer(),
         playerPositions: updateArray({
           array: game.playerPositions,
           match: position => position.playerName === action.playerName,
@@ -34,9 +34,22 @@ export const executeAction = (action: Action) => (game: Game): Game => {
         })
       }
     }
+    case 'treat disease': {
+      return {
+        ...game,
+        currentPlayer: updateCurrentPlayer(),
+        infectedCities: updateArray({
+          array: game.infectedCities,
+          match: city => city.cityName === action.on,
+          update: city => ({...city, patients: city.patients.slice(1)}),
+          upsert: undefined
+        })
+      }
+    }
     case 'build railroads': {
       return {
         ...game,
+        currentPlayer: updateCurrentPlayer(),
         railRoads: [
           ...game.railRoads,
           {between: action.between}

@@ -49,6 +49,7 @@ function App() {
   ]
 
   const possibleActions = getPossibleActions({game})
+
   return (
     <div style={{display: 'grid', height: '100vh', width: '100vw', gridTemplateColumns: '1fr auto'}}>
       <Map 
@@ -56,20 +57,42 @@ function App() {
         infectedCities={game.infectedCities} 
         playerPositions={game.playerPositions}
         adjacentRegions={adjecentRegions}
+        railRoads={game.railRoads}
+        highlightedRoads={possibleActions.flatMap(action => {
+          const onClick = () => updateGame(executeAction(action))
+          switch(action.type) {
+            case 'build railroads':
+              return [{
+                onClick,
+                between: action.between,
+                tooltip: `Build railroad between ${action.between[0]} and ${action.between[1]}`
+              }]
+            default:
+              return []
+          }
+        })}
         highlightedCities={possibleActions.flatMap(action => {
+          const onClick = () => updateGame(executeAction(action))
           switch(action.type) {
             case 'set starting position':
               return [{
                 cityName: action.cityName,
-                onClick: () => updateGame(executeAction(action)),
+                onClick, 
                 tooltip: `Set ${action.cityName} as starting position.`
               }]
 
             case 'move':
               return [{
                 cityName: action.to,
-                onClick: () => updateGame(executeAction(action)),
+                onClick,
                 tooltip: `Move to ${action.to}`
+              }]
+
+            case 'treat disease':
+              return [{
+                cityName: action.on,
+                onClick: () => updateGame(executeAction(action)),
+                tooltip: `Treat disease on ${action.on}`
               }]
             
             default:

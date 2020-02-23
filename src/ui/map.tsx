@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArcherContainer, ArcherElement } from 'react-archer';
+import { ArcherContainer, ArcherElement, ArrowStyle, Relation } from 'react-archer';
 import { City, CityName } from '../model/cities';
 import { Game } from '../model/game';
 import {Tooltip} from 'react-tippy'
@@ -13,6 +13,7 @@ export const Map: React.FC<{
         row: number;
     };
   }[],
+  railRoads: Game['railRoads']
   infectedCities: Game['infectedCities']
   playerPositions: Game['playerPositions']
   highlightedCities: {
@@ -20,11 +21,17 @@ export const Map: React.FC<{
     onClick: () => void
     tooltip: string
   }[]
+  highlightedRoads: {
+    between: [CityName, CityName]
+    onClick: () => void
+    tooltip: string
+  }[]
 }> = props => {
   const size = '2.4vmin'
   const getCityId = (cityName: CityName) => cityName.replace(/\s/gi, '')
+
   return (
-    <ArcherContainer arrowThickness={0} strokeWidth={2} strokeColor='grey' style={{ display: 'grid' }}>
+    <ArcherContainer arrowThickness={0} strokeColor='grey' style={{ display: 'grid' }}>
       <div style={{
         display: 'grid',
         gridTemplateColumns: `repeat(25, ${size})`,
@@ -39,47 +46,81 @@ export const Map: React.FC<{
       }}>
         {/* Render cities */}
         {props.cities.map((city, index) => {
-          const highlighted = props.highlightedCities.find(({cityName}) => city.name === cityName)
-          const highlight = highlighted 
-            ? (node: React.ReactNode) => <Tooltip arrow title={highlighted.tooltip}>{node}</Tooltip>
+          const cityHighlighted = props.highlightedCities.find(({cityName}) => city.name === cityName)
+          const highlightCity = cityHighlighted 
+            ? (node: React.ReactNode) => <Tooltip arrow title={cityHighlighted.tooltip}>{node}</Tooltip>
             : (node: React.ReactNode) => node
+
+          const findHighlightedRoad = (neighbour: CityName) =>
+            props.highlightedRoads.find(({between: [a, b]}) => 
+              a === city.name && b === neighbour
+                || 
+              b === city.name && a === neighbour
+            )
+
+          const roadLabel = (neighbour: CityName) => {
+            const highlightedRoad = findHighlightedRoad(neighbour)
+            return highlightedRoad
+              ? <Tooltip arrow title={highlightedRoad.tooltip}>
+                  <div className='wiggle' style={{height: '24px', width: '24px', zIndex: 100}} 
+                    onClick={highlightedRoad.onClick}> 
+                    🛠 
+                  </div>
+                </Tooltip>
+              : <div/>
+          }
 
           return (
             <ArcherElement
               key={index}
               id={getCityId(city.name)}
               style={{ gridColumn: city.position.column + 1, gridRow: city.position.row, display: 'grid' }}
-              relations={city.connectedTo.map(city => ({
-                targetId: getCityId(city.name),
+              relations={city.connectedTo.map(neighbour => ({
+                targetId: getCityId(neighbour.name),
                 targetAnchor: 'middle',
                 sourceAnchor: 'middle',
-                ...(city.cannotBuildRailRoad ? { style: { strokeDasharray: '12' } } : {})
+                ...(neighbour.cannotBuildRailRoad 
+                  ? { style: { strokeDasharray: '12' } } 
+                  : props.railRoads.some(({between: [a, b]}) => 
+                      a === city.name && b === neighbour.name
+                        ||
+                      b === city.name && a === neighbour.name
+                    )
+                    ? {style: {strokeWidth: 16}}
+                    : {style: {strokeWidth: 2}}),
+                label: roadLabel(neighbour.name)
               }))}
             >
               <div style={{
                 display: 'grid', justifyItems: 'center', alignItems: 'center',
-                whiteSpace: 'nowrap', gridGap: '4px', gridTemplateRows: '1fr 1fr 1fr'
+                whiteSpace: 'nowrap', gridGap: '4px', gridTemplateRows: '1fr 1fr 1fr',
+                pointerEvents: 'none'
               }}>
-                <div style={{ fontSize: '12px' }}>
-                  {city.name}
-                  {city.isPort && '⚓'}
-                  <div style={{fontWeight: 'bold'}}>
-                    {props.playerPositions.find(position => position.cityName === city.name)?.playerName}
+                <div style={{ display: 'block', fontSize: '12px', pointerEvents: 'none' }}>
+                  <a style={{display: 'block', pointerEvents: 'none'}}> 
+                    {city.name + (city.isPort ? '⚓' : '')} 
+                  </a>
+                  <div style={{fontWeight: 'bold', pointerEvents: 'none'}}>
+                    {props.playerPositions
+                      .filter(position => position.cityName === city.name)
+                      ?.map(position => position.playerName)
+                      .join(', ')}
                   </div>
                 </div>
-                {highlight(
+                {highlightCity(
                   <div key={index} 
-                    className={highlighted ? 'shockwave' : undefined}
-                    onClick={highlighted?.onClick}
+                    className={cityHighlighted ? 'shockwave' : undefined}
+                    onClick={cityHighlighted?.onClick}
                     style={{
                       backgroundColor: city.color,
                       borderRadius: size,
                       width: size,
                       height: size,
                       fontSize: '18px',
+                      pointerEvents: 'auto'
                     }} />
                 )}
-                <div style={{ display: 'grid', gridAutoFlow: 'column', gridGap: '4px' }}>
+                <div style={{ display: 'grid', gridAutoFlow: 'column', gridGap: '4px', pointerEvents: 'none' }}>
                   {props.infectedCities.find(infectedCity => infectedCity.cityName === city.name)?.patients
                     .map((color, index) => (
                       <div key={index} style={{ backgroundColor: color, height: '6px', width: '6px' }} />

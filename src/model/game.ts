@@ -6,7 +6,7 @@ export type Game = {
   players: Player[]
   currentPlayer: {
     name: Player['name'],
-    turn: 0 | 1 | 2 | 3
+    turn: number // 0 | 1 | 2 | 3
   }
   playerPositions: {
     playerName: Player['name'],

@@ -7,7 +7,6 @@ export type PlayerAction = {
 } & ({
   type: 'move'
   by:  'carriage/boat' | 'train' | 'ship'
-  from: CityName
   to: CityName
 } | {
   type: 'build railroads'
@@ -30,4 +29,7 @@ export type PlayerAction = {
 } | {
   type: 'discard card'
   card: PlayerCard
+} | {
+  type: 'set starting position',
+  cityName: CityName
 })

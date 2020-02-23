@@ -1,7 +1,7 @@
 import { CityName } from '../model/cities';
 import { Game } from "../model/game";
 import { Player } from '../model/player';
-import { Event } from '../model/event';
+import { GameEvent } from '../model/game-event';
 
 const keys = <T extends {}>(o: T): (keyof T)[] => {
   return Object.keys(o) as (keyof T)[]
@@ -11,7 +11,7 @@ export const getNextEvent = ({
   game,
 }: {
   game: Game,
-}): Event => {
+}): GameEvent => {
   const overloadedCity = game.infectedCities.find(city => city.patients.length > 3)
   if(overloadedCity) {
     return {
@@ -22,13 +22,13 @@ export const getNextEvent = ({
   const playerWithTooManyCards = game.playerCards.find(player => player.cards.length > 7)
   if(playerWithTooManyCards) {
     return {
-      type: 'request to discard card',
+      type: 'discard a card',
       playerName: playerWithTooManyCards.playerName
     }
   } 
 
   return {
-    type: 'request action',
+    type: 'choose an action',
     playerName: game.currentPlayer.name
   }
 }

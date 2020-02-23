@@ -9,6 +9,7 @@ export type InfectionCard = {
 export type PlayerCard = {
   type: 'city'
   cityName: CityName
+  cityColor: City['color']
 } | {
   type: 'epidemic'
 }

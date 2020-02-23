@@ -8,7 +8,8 @@ export const setupGame = (): Game => {
   const players = shuffle.pick(allPlayers, {picks: 4})
   const playerDeck = shuffle.default(cities.map(city => ({
     type: 'city' as 'city',
-    cityName: city.name
+    cityName: city.name,
+    cityColor: city.color
   })))
   const infectionDeck: InfectionCard[] = shuffle.default(cities.map(city => ({
     type: 'infection' as 'infection',
@@ -65,7 +66,7 @@ export const setupGame = (): Game => {
     },
     playerPositions: [],
     playerCards, 
-    outbreakLevel: 1,
+    outbreakLevel: 0,
     infectionRateIndex: 0,
     infectionDeck: remainingInfectionCards,
     infectionDiscardPile: [

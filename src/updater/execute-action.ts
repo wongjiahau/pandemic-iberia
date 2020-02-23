@@ -2,21 +2,36 @@ import { updateArray } from './../util/array';
 import { Game } from "../model/game";
 import { Action } from "../model/action";
 
-export const executeAction = ({
-  game,
-  action
-}: {
-  game: Game,
-  action: Action
-}): Game => {
+export const executeAction = (action: Action) => (game: Game): Game => {
+  const updateTurn = (): Game['currentPlayer'] => {
+    const currentPlayerIndex = game.players.findIndex(player => player.name === game.currentPlayer.name)
+    const nextPlayer = game.players[(currentPlayerIndex + 1) % game.players.length]
+    return game.currentPlayer.turn === 3
+      ? {
+        name: nextPlayer.name,
+        turn: 0
+      }
+      : {
+        ...game.currentPlayer,
+        turn: game.currentPlayer.turn + 1
+      }
+  }
   switch(action.type) {
+    case 'set starting position':
+      return {
+        ...game,
+        playerPositions: [...game.playerPositions, {playerName: action.playerName, cityName: action.cityName}]
+      }
     case 'move': {
       return {
         ...game,
-        playerPositions: {
-          ...game.playerPositions,
-          [action.playerName]: action.to
-        }
+        currentPlayer: updateTurn(),
+        playerPositions: updateArray({
+          array: game.playerPositions,
+          match: position => position.playerName === action.playerName,
+          update: position => ({...position, cityName: action.to}),
+          upsert: undefined
+        })
       }
     }
     case 'build railroads': {

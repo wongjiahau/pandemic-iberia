@@ -10,6 +10,8 @@ import { Deck } from './deck';
 import { PlayerCardsInfo } from './player-cards-info';
 import { executeAction } from '../updater/execute-action';
 import { getPossibleActions } from '../updater/get-possible-actions';
+import { PlayerAction } from '../model/player-action';
+import { infectionCountMarkers } from '../model/game';
 
 
 function App() {
@@ -102,13 +104,33 @@ function App() {
         />
       <div style={{display: 'grid', padding: '12px', gridGap: '12px', alignContent: 'start'}}>
         <div style={{display: 'grid', gridGap: '12px'}}>
-          <Tracker label={'Infection Rate'} levels={[2,2,2,3,3,4,4].map(x => x.toString())} 
+          <Tracker label={'Infection Rate'} levels={infectionCountMarkers.map(x => x.toString())} 
             focusedIndex={game.infectionRateIndex}/>
           <Tracker label={'Outbreaks'} levels={[0,1,2,3,4,5,6,7].map(x => x.toString())} 
             focusedIndex={game.outbreakLevel}/>
-          <Deck label='Player Deck' cards={game.playerDeck} cardColor='green'/>
+          <Deck label='Player Deck' cards={game.playerDeck} cardColor='green'
+            highlight={possibleActions.some(action => action.type === 'draw 2 player cards') 
+              ? {
+                tooltip: 'Draw 2 player cards',
+                onClick: () => updateGame(executeAction({
+                  type: 'draw 2 player cards', 
+                  playerName: game.currentPlayer.name
+                }))
+              }
+              : undefined
+            }/>
           <Deck label='Discarded Player Cards' cards={game.playerDiscardPile} cardColor='green'/>
-          <Deck label='Infection Deck' cards={game.infectionDeck} cardColor='pink'/>
+          <Deck label='Infection Deck' cards={game.infectionDeck} cardColor='pink'
+            highlight={possibleActions.some(action => action.type === 'draw infection cards')
+              ? {
+                tooltip: 'Draw infection cards',
+                onClick: () => updateGame(executeAction({
+                  type: 'draw infection cards',
+                  playerName: game.currentPlayer.name
+                }))
+              }
+              : undefined
+            }/>
           <Deck label='Discarded Infection Cards' cards={game.infectionDiscardPile} cardColor='pink'/>
         </div>
         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gridGap: '12px'}}>
@@ -117,7 +139,7 @@ function App() {
           ))}
         </div>
         <div style={{color: 'green'}}>
-          {game.currentPlayer.name}'s turn to perform action #{game.currentPlayer.turn + 1}.
+          {game.currentPlayer.name}'s turn to perform action #{game.currentPlayer.numberOfPerformedActions + 1}.
         </div>
       </div>
     </div>

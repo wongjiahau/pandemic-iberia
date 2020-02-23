@@ -8,11 +8,13 @@ export const getPossibleActions = ({
 }: {
   game: Game
 }): PlayerAction[] => {
-  const playerName = game.currentPlayer.name
-  const currentPlayerPosition = game.playerPositions.find(position => position.playerName === game.currentPlayer.name)
+  const {currentPlayer} = game
+  const playerName = currentPlayer.name
+  const currentPlayerPosition = game.playerPositions.find(position => position.playerName === currentPlayer.name)
+  console.log(currentPlayer)
   if(!currentPlayerPosition) {
     return game.playerCards
-      .find(playerCards => playerCards.playerName === game.currentPlayer.name)?.cards
+      .find(playerCards => playerCards.playerName === currentPlayer.name)?.cards
       .flatMap(card => card.type === 'city' ? [card.cityName] : [])
       .map(cityName => {
         return {
@@ -21,6 +23,21 @@ export const getPossibleActions = ({
           cityName
         } as PlayerAction
       }) ?? []
+  }
+
+  if(currentPlayer.numberOfPerformedActions === 4 && !currentPlayer.drawnPlayerCards) {
+    return [{
+      type: 'draw 2 player cards',
+      playerName: currentPlayer.name
+    }]
+  }
+
+  if(currentPlayer.numberOfPerformedActions === 4 && currentPlayer.drawnPlayerCards 
+      && !currentPlayer.drawnInfectionCards) {
+    return [{
+      type: 'draw infection cards',
+      playerName: currentPlayer.name
+    }]
   }
 
   const playerPosition = game.playerPositions.find(position => position.playerName === playerName)

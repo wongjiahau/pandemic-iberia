@@ -6,14 +6,16 @@ export type Game = {
   players: Player[]
   currentPlayer: {
     name: Player['name'],
-    turn: number // 0 | 1 | 2 | 3
+    numberOfPerformedActions: number // 0 | 1 | 2 | 3
+    drawnPlayerCards?: boolean
+    drawnInfectionCards?: boolean
   }
   playerPositions: {
     playerName: Player['name'],
     cityName: CityName
   }[]
   playerCards: {
-    playerName: Player['name'], 
+    playerName: Player['name'],
     cards: PlayerCard[]
   }[]
   outbreakLevel: number
@@ -24,7 +26,7 @@ export type Game = {
   playerDiscardPile: PlayerCard[]
   cities: City[]
   infectedCities: {
-    cityName: CityName, 
+    cityName: CityName,
     patients: City['color'][]
   }[]
   railRoads: {
@@ -37,3 +39,5 @@ export type Game = {
   hospitals: CityName[]
   researchedDisease: CityName[]
 }
+
+export const infectionCountMarkers = [2, 2, 2, 3, 3, 4, 4]

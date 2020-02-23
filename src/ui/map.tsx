@@ -61,7 +61,7 @@ export const Map: React.FC<{
           const roadLabel = (neighbour: CityName) => {
             const highlightedRoad = findHighlightedRoad(neighbour)
             return highlightedRoad
-              ? <Tooltip arrow title={highlightedRoad.tooltip}>
+              ? <Tooltip arrow title={highlightedRoad.tooltip} >
                   <div className='wiggle' style={{height: '24px', width: '24px', zIndex: 100}} 
                     onClick={highlightedRoad.onClick}> 
                     🛠 
@@ -74,7 +74,12 @@ export const Map: React.FC<{
             <ArcherElement
               key={index}
               id={getCityId(city.name)}
-              style={{ gridColumn: city.position.column + 1, gridRow: city.position.row, display: 'grid' }}
+              style={{ 
+                gridColumn: city.position.column + 1, 
+                gridRow: city.position.row, 
+                display: 'grid', 
+                pointerEvents: 'none'
+              }}
               relations={city.connectedTo.map(neighbour => ({
                 targetId: getCityId(neighbour.name),
                 targetAnchor: 'middle',
@@ -93,18 +98,18 @@ export const Map: React.FC<{
             >
               <div style={{
                 display: 'grid', justifyItems: 'center', alignItems: 'center',
-                whiteSpace: 'nowrap', gridGap: '4px', gridTemplateRows: '1fr 1fr 1fr',
+                whiteSpace: 'nowrap', gridGap: '2px', gridTemplateRows: '1fr 1fr 1fr',
                 pointerEvents: 'none'
               }}>
                 <div style={{ display: 'block', fontSize: '12px', pointerEvents: 'none' }}>
-                  <a style={{display: 'block', pointerEvents: 'none'}}> 
+                  <a style={{display: 'block', pointerEvents: 'none', textAlign: 'center'}}> 
                     {city.name + (city.isPort ? '⚓' : '')} 
                   </a>
-                  <div style={{fontWeight: 'bold', pointerEvents: 'none'}}>
+                  <div style={{fontWeight: 'bold', pointerEvents: 'none', fontSize: '12px'}}>
                     {props.playerPositions
                       .filter(position => position.cityName === city.name)
                       ?.map(position => position.playerName)
-                      .join(', ')}
+                      .join(', ')} 
                   </div>
                 </div>
                 {highlightCity(
@@ -116,11 +121,11 @@ export const Map: React.FC<{
                       borderRadius: size,
                       width: size,
                       height: size,
-                      fontSize: '18px',
                       pointerEvents: 'auto'
                     }} />
                 )}
-                <div style={{ display: 'grid', gridAutoFlow: 'column', gridGap: '4px', pointerEvents: 'none' }}>
+                <div style={{ display: 'grid', gridAutoFlow: 'column', gridGap: '4px', pointerEvents: 'none', 
+                  alignSelf: 'start' }}>
                   {props.infectedCities.find(infectedCity => infectedCity.cityName === city.name)?.patients
                     .map((color, index) => (
                       <div key={index} style={{ backgroundColor: color, height: '6px', width: '6px' }} />

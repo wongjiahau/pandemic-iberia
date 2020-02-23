@@ -32,4 +32,8 @@ export type PlayerAction = {
 } | {
   type: 'set starting position',
   cityName: CityName
+} | {
+  type: 'draw 2 player cards'
+} | {
+  type: 'draw infection cards'
 })

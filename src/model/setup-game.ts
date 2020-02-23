@@ -62,7 +62,7 @@ export const setupGame = (): Game => {
     players,
     currentPlayer: {
       name: players[0]?.name,
-      turn: 0
+      numberOfPerformedActions: 0
     },
     playerPositions: [],
     playerCards, 

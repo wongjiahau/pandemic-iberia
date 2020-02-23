@@ -20,7 +20,9 @@ export const PlayerCardsInfo: React.FC<{
               </div>
             </div>
           :
-            undefined
+            <div key={index} style={{fontWeight: 'bold'}}>
+              !EPIDEMIC!
+            </div>
       ))}
     </div>
   )

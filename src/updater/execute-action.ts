@@ -1,20 +1,36 @@
 import { updateArray } from './../util/array';
-import { Game } from "../model/game";
+import { Game, infectionCountMarkers as infectionRateMarkers } from "../model/game";
 import { Action } from "../model/action";
 
 export const executeAction = (action: Action) => (game: Game): Game => {
   const updateCurrentPlayer = (): Game['currentPlayer'] => {
-    const currentPlayerIndex = game.players.findIndex(player => player.name === game.currentPlayer.name)
+    const {currentPlayer} = game
+    const currentPlayerIndex = game.players.findIndex(player => player.name === currentPlayer.name)
     const nextPlayer = game.players[(currentPlayerIndex + 1) % game.players.length]
-    return game.currentPlayer.turn === 3
-      ? {
+    const {numberOfPerformedActions, drawnPlayerCards, drawnInfectionCards} = currentPlayer
+    console.log(numberOfPerformedActions, drawnPlayerCards, drawnInfectionCards)
+    if(numberOfPerformedActions < 4) {
+      return {
+        ...currentPlayer,
+        numberOfPerformedActions: numberOfPerformedActions + 1
+      }
+    }
+    else if(numberOfPerformedActions === 4 && !drawnPlayerCards) {
+      return {
+        ...currentPlayer,
+        drawnPlayerCards: true
+      }
+    }
+    else if(numberOfPerformedActions === 4 && drawnPlayerCards && !drawnInfectionCards) {
+      return {
         name: nextPlayer.name,
-        turn: 0
+        numberOfPerformedActions: 0
       }
-      : {
-        ...game.currentPlayer,
-        turn: game.currentPlayer.turn + 1
-      }
+    }
+    else {
+      console.log(game)
+      throw new Error(`Shouldn't reach here. The game state is as above.`)
+    }
   }
   switch(action.type) {
     case 'set starting position':
@@ -68,6 +84,7 @@ export const executeAction = (action: Action) => (game: Game): Game => {
     case 'draw 2 player cards': {
       return {
         ...game,
+        currentPlayer: updateCurrentPlayer(),
         playerDeck: game.playerDeck.slice(2),
         playerCards: updateArray({
           array: game.playerCards,
@@ -76,6 +93,22 @@ export const executeAction = (action: Action) => (game: Game): Game => {
           upsert: undefined
         })
       }
+    }
+    case 'draw infection cards': {
+      const count = infectionRateMarkers[game.infectionRateIndex]
+      const infectionCards = game.infectionDeck.slice(0, count)
+      return executeActions(infectionCards.map<Action>(infectionCard => {
+        return {
+          type: 'infect cities',
+          cityName: infectionCard.cityName,
+          cubes: [infectionCard.cityColor]
+        }
+      }))({
+        ...game,
+        currentPlayer: updateCurrentPlayer(),
+        infectionDeck: game.infectionDeck.slice(count),
+        infectionDiscardPile: [...game.infectionDiscardPile, ...infectionCards]
+      })
     }
     case 'infect cities': {
       return {
@@ -91,4 +124,10 @@ export const executeAction = (action: Action) => (game: Game): Game => {
     default:
       throw new Error(`Cannot handle ${action.type} yet`)
   }
+}
+
+export const executeActions = (actions: Action[]) => (game: Game) => {
+  return actions.reduce((game, action) => {
+    return executeAction(action)(game)
+  }, game)
 }

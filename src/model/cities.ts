@@ -178,23 +178,23 @@ export const cities: City[] = [{
   name: 'Cadiz',
   isPort: true,
   connectedTo: [{ name: 'Sevilla' }, { name: 'Gibraltar', cannotBuildRailRoad: true }, { name: 'Huelva', cannotBuildRailRoad: true }],
-  position: {column: 6, row: 19}
+  position: { column: 6, row: 19 }
 }, {
   color: 'black',
   name: 'Malaga',
   isPort: true,
-  connectedTo: [{name: 'Granada' }, {name: 'Almeria'}, {name: 'Gibraltar', cannotBuildRailRoad: true}, {name: 'Sevilla'}, {name: 'Cordoba'}],
-  position: {column: 10, row: 18}
+  connectedTo: [{ name: 'Granada' }, { name: 'Almeria' }, { name: 'Gibraltar', cannotBuildRailRoad: true }, { name: 'Sevilla' }, { name: 'Cordoba' }],
+  position: { column: 10, row: 18 }
 }, {
   color: 'black',
   name: 'Almeria',
   isPort: true,
-  connectedTo: [{name: 'Cartagena'}, {name: 'Malaga'}, {name: 'Granada'}],
-  position: {column: 14, row: 18}
+  connectedTo: [{ name: 'Cartagena' }, { name: 'Malaga' }, { name: 'Granada' }],
+  position: { column: 14, row: 18 }
 }, {
   color: 'black',
   name: 'Gibraltar',
   isPort: true,
-  connectedTo: [{name: 'Malaga', cannotBuildRailRoad: true}, {name: 'Cadiz', cannotBuildRailRoad: true},],
-  position: {column: 8, row: 19}
+  connectedTo: [{ name: 'Malaga', cannotBuildRailRoad: true }, { name: 'Cadiz', cannotBuildRailRoad: true },],
+  position: { column: 8, row: 19 }
 }]

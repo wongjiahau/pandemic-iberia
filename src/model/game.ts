@@ -37,7 +37,7 @@ export type Game = {
     affectedCities: CityName[]
   }[]
   hospitals: CityName[]
-  researchedDisease: CityName[]
+  researchedDisease: City['color'][]
 }
 
 export const infectionCountMarkers = [2, 2, 2, 3, 3, 4, 4]

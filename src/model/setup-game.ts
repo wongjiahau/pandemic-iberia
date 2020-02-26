@@ -1,8 +1,8 @@
-import { PlayerCard, InfectionCard } from './cards';
-import { Game } from "./game"
-import * as shuffle from 'shuffle-array'
-import { allPlayers, Player } from "./player"
-import { cities } from "./cities"
+import * as shuffle from 'shuffle-array';
+import { InfectionCard, PlayerCard } from './cards';
+import { cities } from "./cities";
+import { Game } from "./game";
+import { allPlayers } from "./player";
 
 export const setupGame = (): Game => {
   const players = shuffle.pick(allPlayers, {picks: 4})

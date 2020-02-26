@@ -1,17 +1,16 @@
 import React from 'react';
-import './App.css';
-import 'react-tippy/dist/tippy.css'
-import { setupGame } from '../model/setup-game';
+import 'react-tippy/dist/tippy.css';
+import { infectionCountMarkers } from '../model/game';
 import { getAdjacentRegions } from '../model/get-adjacent-regions';
-import { notUndefined } from '../util/not-undefined';
-import {Map} from './map'
-import { Tracker } from './tracker';
-import { Deck } from './deck';
-import { PlayerCardsInfo } from './player-cards-info';
+import { setupGame } from '../model/setup-game';
 import { executeAction } from '../updater/execute-action';
 import { getPossibleActions } from '../updater/get-possible-actions';
-import { PlayerAction } from '../model/player-action';
-import { infectionCountMarkers } from '../model/game';
+import { notUndefined } from '../util/not-undefined';
+import './App.css';
+import { Deck } from './deck';
+import { Map } from './map';
+import { PlayerCardsInfo } from './player-cards-info';
+import { Tracker } from './tracker';
 
 
 function App() {
@@ -93,8 +92,15 @@ function App() {
             case 'treat disease':
               return [{
                 cityName: action.on,
-                onClick: () => updateGame(executeAction(action)),
+                onClick,
                 tooltip: `Treat disease on ${action.on}`
+              }]
+
+            case 'outbreak':
+              return [{
+                cityName: action.cityName,
+                onClick,
+                tooltip: `Outbreak`
               }]
             
             default:
@@ -135,7 +141,8 @@ function App() {
         </div>
         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gridGap: '12px'}}>
           {game.playerCards.map((playerCards, index) => (
-            <PlayerCardsInfo key={index} playerCards={playerCards}/>
+            <PlayerCardsInfo key={index} playerCards={playerCards}
+              onClickEpidemic={() => updateGame(executeAction({type: 'epidemic'}))}/>
           ))}
         </div>
         <div style={{color: 'green'}}>

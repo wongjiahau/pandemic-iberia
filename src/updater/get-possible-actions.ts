@@ -1,17 +1,63 @@
-import { CityName } from './../model/cities';
-import { Game } from './../model/game';
-import { Player } from './../model/player';
 import { PlayerAction } from '../model/player-action';
+import { City, CityName } from './../model/cities';
+import { Game } from './../model/game';
 
 export const getPossibleActions = ({
   game
 }: {
   game: Game
 }): PlayerAction[] => {
+  if(game.playerDeck.length === 0) {
+    return [{
+      type: 'game ended',
+      playerName: game.currentPlayer.name,
+      reason: {
+        type: 'player deck exhausted'
+      }
+    }]
+  }
+
+  const patients = game.infectedCities.flatMap(city => city.patients)
+  const overloadedDisease = ([ 'yellow', 'red', 'blue', 'black' ] as City['color'][])
+    .find(color => patients.filter(patient => patient === color).length > 24)
+
+  if(overloadedDisease) {
+    return [{
+      type: 'game ended',
+      playerName: game.currentPlayer.name,
+      reason: {
+        type: 'patient cube ran out',
+        color: overloadedDisease
+      }
+    }]
+  }
+
+  const overloadedCity = game.infectedCities.find(city => city.patients.length > 3)
+  if(overloadedCity) {
+    return [{
+      type: 'outbreak',
+      playerName: game.currentPlayer.name,
+      cityName: overloadedCity.cityName
+    }]
+  }
+  const playerWithTooManyCards = game.playerCards.find(player => player.cards.length > 7)
+  if(playerWithTooManyCards) {
+    return [{
+      type: 'discard a card',
+      playerName: playerWithTooManyCards.playerName
+    }]
+  } 
+
   const {currentPlayer} = game
   const playerName = currentPlayer.name
   const currentPlayerPosition = game.playerPositions.find(position => position.playerName === currentPlayer.name)
-  console.log(currentPlayer)
+
+  if(game.playerCards.flatMap(({cards}) => cards).some(card => card.type === 'epidemic')) {
+    return [{
+      type: 'epidemic',
+      playerName: currentPlayer.name
+    }]
+  }
   if(!currentPlayerPosition) {
     return game.playerCards
       .find(playerCards => playerCards.playerName === currentPlayer.name)?.cards
@@ -52,6 +98,9 @@ export const getPossibleActions = ({
       .map(neighbour => [city.name, neighbour.name] as [CityName, CityName])
     : []
 
+  const canBuildRailRoads = game.railRoads.length < 20 &&
+    builtRailRoads.length < (city?.connectedTo ?? []).length
+
   const canTreatDisease = 
     (game.infectedCities.find(({cityName}) => cityName === city?.name)?.patients ?? []).length > 0
 
@@ -67,10 +116,10 @@ export const getPossibleActions = ({
       playerName,
       on: city.name
     }] : []),
-    ...possbleRailRoadsSpace.map(between => ({
+    ...(canBuildRailRoads ? possbleRailRoadsSpace.map(between => ({
       type: 'build railroads' as 'build railroads',
       playerName,
       between
-    }))
+    })) : [])
   ]
 }

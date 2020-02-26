@@ -1,27 +1,28 @@
 import { updateArray } from './../util/array';
 import { Game, infectionCountMarkers as infectionRateMarkers } from "../model/game";
 import { Action } from "../model/action";
+import shuffle from 'shuffle-array';
+import { City } from '../model/cities';
 
 export const executeAction = (action: Action) => (game: Game): Game => {
   const updateCurrentPlayer = (): Game['currentPlayer'] => {
-    const {currentPlayer} = game
+    const { currentPlayer } = game
     const currentPlayerIndex = game.players.findIndex(player => player.name === currentPlayer.name)
     const nextPlayer = game.players[(currentPlayerIndex + 1) % game.players.length]
-    const {numberOfPerformedActions, drawnPlayerCards, drawnInfectionCards} = currentPlayer
-    console.log(numberOfPerformedActions, drawnPlayerCards, drawnInfectionCards)
-    if(numberOfPerformedActions < 4) {
+    const { numberOfPerformedActions, drawnPlayerCards, drawnInfectionCards } = currentPlayer
+    if (numberOfPerformedActions < 4) {
       return {
         ...currentPlayer,
         numberOfPerformedActions: numberOfPerformedActions + 1
       }
     }
-    else if(numberOfPerformedActions === 4 && !drawnPlayerCards) {
+    else if (numberOfPerformedActions === 4 && !drawnPlayerCards) {
       return {
         ...currentPlayer,
         drawnPlayerCards: true
       }
     }
-    else if(numberOfPerformedActions === 4 && drawnPlayerCards && !drawnInfectionCards) {
+    else if (numberOfPerformedActions === 4 && drawnPlayerCards && !drawnInfectionCards) {
       return {
         name: nextPlayer.name,
         numberOfPerformedActions: 0
@@ -32,11 +33,11 @@ export const executeAction = (action: Action) => (game: Game): Game => {
       throw new Error(`Shouldn't reach here. The game state is as above.`)
     }
   }
-  switch(action.type) {
+  switch (action.type) {
     case 'set starting position':
       return {
         ...game,
-        playerPositions: [...game.playerPositions, {playerName: action.playerName, cityName: action.cityName}]
+        playerPositions: [...game.playerPositions, { playerName: action.playerName, cityName: action.cityName }]
       }
     case 'move': {
       return {
@@ -45,7 +46,7 @@ export const executeAction = (action: Action) => (game: Game): Game => {
         playerPositions: updateArray({
           array: game.playerPositions,
           match: position => position.playerName === action.playerName,
-          update: position => ({...position, cityName: action.to}),
+          update: position => ({ ...position, cityName: action.to }),
           upsert: undefined
         })
       }
@@ -57,7 +58,7 @@ export const executeAction = (action: Action) => (game: Game): Game => {
         infectedCities: updateArray({
           array: game.infectedCities,
           match: city => city.cityName === action.on,
-          update: city => ({...city, patients: city.patients.slice(1)}),
+          update: city => ({ ...city, patients: city.patients.slice(1) }),
           upsert: undefined
         })
       }
@@ -68,7 +69,7 @@ export const executeAction = (action: Action) => (game: Game): Game => {
         currentPlayer: updateCurrentPlayer(),
         railRoads: [
           ...game.railRoads,
-          {between: action.between}
+          { between: action.between }
         ]
       }
     }
@@ -89,7 +90,7 @@ export const executeAction = (action: Action) => (game: Game): Game => {
         playerCards: updateArray({
           array: game.playerCards,
           match: playerCard => playerCard.playerName === action.playerName,
-          update: playerCard => ({...playerCard, cards: [...playerCard.cards, ...game.playerDeck.slice(0, 2)]}),
+          update: playerCard => ({ ...playerCard, cards: [...playerCard.cards, ...game.playerDeck.slice(0, 2)] }),
           upsert: undefined
         })
       }
@@ -116,8 +117,62 @@ export const executeAction = (action: Action) => (game: Game): Game => {
         infectedCities: updateArray({
           array: game.infectedCities,
           match: patient => patient.cityName === action.cityName,
-          update: patient => ({...patient, cubes: [...action.cubes]}),
-          upsert: {cityName: action.cityName, patients: action.cubes}
+          update: patient => ({ ...patient, cubes: [...action.cubes] }),
+          upsert: { cityName: action.cityName, patients: action.cubes }
+        })
+      }
+    }
+    case 'epidemic': {
+      const lastCard = game.infectionDeck.slice(-1)[0]
+      const updatedGame: Game = {
+        ...game,
+        infectionRateIndex: game.infectionRateIndex + 1,
+        infectionDeck: [
+          ...(shuffle([...game.infectionDiscardPile, lastCard])),
+          ...game.infectionDeck.slice(0, game.infectionDeck.length - 1)
+        ],
+        infectionDiscardPile: [],
+        playerCards: updateArray({
+          array: game.playerCards,
+          match: playerCard => playerCard.playerName === game.currentPlayer.name,
+          update: playerCard => ({
+            ...playerCard, 
+            cards: playerCard.cards.filter(card => card.type !== 'epidemic')
+          }),
+          upsert: undefined
+        }),
+        playerDiscardPile: [...game.playerDiscardPile, {type: 'epidemic'}]
+      }
+
+      const targetCity = game.infectedCities.find(city => city.cityName === lastCard.cityName)
+      if (targetCity && targetCity.patients.length > 0) {
+        return executeAction({
+          type: 'outbreak',
+          cityName: targetCity.cityName,
+          playerName: game.currentPlayer.name
+        })(updatedGame)
+      }
+      else {
+        return executeAction({
+          type: 'infect cities',
+          cubes: new Array<City['color']>(3).fill(lastCard.cityColor),
+          cityName: lastCard.cityName
+        })(updatedGame)
+      }
+    }
+    case 'outbreak': {
+      const targetCity = game.cities.find(city => city.name === action.cityName)
+      if(!targetCity) {
+        throw new Error(`targetCity is undefined for cityName of ${action.cityName}`)
+      }
+      else {
+        return executeActions(targetCity.connectedTo.map<Action>(neighbour => ({
+          type: 'infect cities',
+          cubes: [targetCity.color],
+          cityName: neighbour.name
+        })))({
+          ...game,
+          outbreakLevel: game.outbreakLevel + 1
         })
       }
     }

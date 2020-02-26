@@ -1,8 +1,10 @@
 import React from 'react';
 import { Game } from '../model/game';
+import {Tooltip} from 'react-tippy'
 
 export const PlayerCardsInfo: React.FC<{
-  playerCards: Game['playerCards'][0]
+  playerCards: Game['playerCards'][0],
+  onClickEpidemic: () => void
 }> = props => {
   return (
     <div style={{display: 'grid', alignContent: 'start', gridGap: '4px'}}>
@@ -20,9 +22,12 @@ export const PlayerCardsInfo: React.FC<{
               </div>
             </div>
           :
-            <div key={index} style={{fontWeight: 'bold'}}>
-              !EPIDEMIC!
-            </div>
+            <Tooltip title='Execute epidemic'>
+              <div className='shockwave' key={index} style={{fontWeight: 'bold'}} 
+                onClick={props.onClickEpidemic}>
+                !EPIDEMIC!
+              </div>
+            </Tooltip>
       ))}
     </div>
   )

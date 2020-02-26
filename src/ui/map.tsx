@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArcherContainer, ArcherElement, ArrowStyle, Relation } from 'react-archer';
+import { ArcherContainer, ArcherElement } from 'react-archer';
 import { City, CityName } from '../model/cities';
 import { Game } from '../model/game';
 import {Tooltip} from 'react-tippy'
@@ -53,9 +53,9 @@ export const Map: React.FC<{
 
           const findHighlightedRoad = (neighbour: CityName) =>
             props.highlightedRoads.find(({between: [a, b]}) => 
-              a === city.name && b === neighbour
+              (a === city.name && b === neighbour)
                 || 
-              b === city.name && a === neighbour
+              (b === city.name && a === neighbour)
             )
 
           const roadLabel = (neighbour: CityName) => {
@@ -87,9 +87,9 @@ export const Map: React.FC<{
                 ...(neighbour.cannotBuildRailRoad 
                   ? { style: { strokeDasharray: '12' } } 
                   : props.railRoads.some(({between: [a, b]}) => 
-                      a === city.name && b === neighbour.name
+                      (a === city.name && b === neighbour.name)
                         ||
-                      b === city.name && a === neighbour.name
+                      (b === city.name && a === neighbour.name)
                     )
                     ? {style: {strokeWidth: 16}}
                     : {style: {strokeWidth: 2}}),
@@ -102,7 +102,7 @@ export const Map: React.FC<{
                 pointerEvents: 'none'
               }}>
                 <div style={{ display: 'block', fontSize: '12px', pointerEvents: 'none' }}>
-                  <a style={{display: 'block', pointerEvents: 'none', textAlign: 'center'}}> 
+                  <a href='_' style={{display: 'block', pointerEvents: 'none', textAlign: 'center'}}> 
                     {city.name + (city.isPort ? '⚓' : '')} 
                   </a>
                   <div style={{fontWeight: 'bold', pointerEvents: 'none', fontSize: '12px'}}>
@@ -145,7 +145,7 @@ export const Map: React.FC<{
                 alert(adjacentRegion.cities.map(city => city.name).join(','))
               }}
             >
-              🚰
+              <span aria-label='water' role='img'> 🚰 </span>
               </div>
           </ArcherElement>
         ))}

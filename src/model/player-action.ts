@@ -36,4 +36,24 @@ export type PlayerAction = {
   type: 'draw 2 player cards'
 } | {
   type: 'draw infection cards'
+}| {
+  type: 'epidemic'
+} | {
+  type: 'outbreak' 
+  cityName: City['name']
+} | {
+  type: 'game ended'
+  reason: {
+    type: 'max outbreak reached'
+  } | {
+    type: 'patient cube ran out'
+    color: City['color']
+  } | {
+    type: 'player deck exhausted'
+  } | {
+    type: 'four diseases cured'
+  }
+} | {
+  type: 'discard a card',
+  playerName: Player['name']
 })

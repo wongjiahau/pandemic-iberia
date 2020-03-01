@@ -17,6 +17,16 @@ export const getPossibleActions = ({
     }]
   }
 
+  if(game.outbreakLevel >= 7) {
+    return [{
+      type: 'game ended',
+      playerName: game.currentPlayer.name,
+      reason: {
+        type: 'max outbreak reached'
+      }
+    }]
+  }
+
   const patients = game.infectedCities.flatMap(city => city.patients)
   const overloadedDisease = ([ 'yellow', 'red', 'blue', 'black' ] as City['color'][])
     .find(color => patients.filter(patient => patient === color).length > 24)
@@ -104,12 +114,27 @@ export const getPossibleActions = ({
   const canTreatDisease = 
     (game.infectedCities.find(({cityName}) => cityName === city?.name)?.patients ?? []).length > 0
 
+  const possibleDestinationsViaRailway = 
+    city
+      ? findPossibleDestinationsViaRailways({
+          city,
+          railRoads: game.railRoads,
+          allCities: game.cities
+        })
+        .filter(cityName => cityName !== city.name)
+      : []
   return [
     ...(city?.connectedTo ?? []).map<PlayerAction>(neighbour => ({
       type: 'move',
       to: neighbour.name,
       playerName,
       by: 'carriage/boat'
+    })),
+    ...possibleDestinationsViaRailway.map<PlayerAction>(destination => ({
+      type: 'move',
+      to: destination,
+      playerName,
+      by: 'train'
     })),
     ...(canTreatDisease && city ? [{
       type: 'treat disease' as 'treat disease',
@@ -122,4 +147,72 @@ export const getPossibleActions = ({
       between
     })) : [])
   ]
+}
+
+const findPossibleDestinationsViaRailways = ({
+  city,
+  railRoads,
+  allCities
+}: {
+  city: City,
+  railRoads: Game['railRoads'],
+  allCities: City[]
+}): CityName[] => {
+  return findPossibleDestinationsViaRailways$({
+    city,
+    railRoads,
+    allCities,
+    foundDestinations: [],
+    searchedDestinations: []
+  })
+}
+
+const findPossibleDestinationsViaRailways$ = ({
+  city,
+  railRoads,
+  allCities,
+  foundDestinations,
+  searchedDestinations
+}: {
+  city: City,
+  railRoads: Game['railRoads'],
+  allCities: City[],
+  foundDestinations: CityName[]
+  searchedDestinations: CityName[]
+}): CityName[] => {
+  const possibleDestinations = 
+    city.connectedTo
+      .filter(neighbour => railRoads
+        .some(({between: [a, b]}) => 
+          (a === neighbour.name && b === city.name)
+            ||
+          (b === neighbour.name && a === city.name)
+        ))
+      .map(({name}) => name)
+
+  return possibleDestinations
+    .reduce<CityName[]>((destinations, cityName) => {
+      if(searchedDestinations.includes(cityName)) {
+        return destinations
+      }
+      else {
+        const city = allCities.find(({name}) => cityName === name)
+        if(!city) {
+          return destinations
+        }
+        else {
+          return [
+            ...destinations,
+            ...findPossibleDestinationsViaRailways$({
+              city,
+              railRoads,
+              allCities,
+              foundDestinations: destinations,
+              searchedDestinations: [...searchedDestinations, city.name]
+            })
+          ]
+        }
+      }
+    }, [...possibleDestinations, ...foundDestinations] as CityName[])
+    .filter((destination, index, destinations) => index === destinations.indexOf(destination))
 }

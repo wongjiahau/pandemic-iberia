@@ -1,6 +1,6 @@
 Game feature
-[] discard card
-[] move by railroads
+[x] discard card
+[x] move by railroads
 [] put water
 [] share knowledge
 [] build hospital

@@ -61,7 +61,7 @@ function App() {
       setTimeout(() => {
         console.log(chosenAction)
         updateGame(executeAction(chosenAction))
-      }, 1000)
+      }, 500)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(possibleActions)])

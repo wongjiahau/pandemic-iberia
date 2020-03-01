@@ -36,11 +36,14 @@ export type PlayerAction = {
   type: 'draw 2 player cards'
 } | {
   type: 'draw infection cards'
-}| {
+} | {
+  type: 'use drawn infection cards'
+} | {
   type: 'epidemic'
 } | {
   type: 'outbreak' 
   cityName: City['name']
+  sourceCityName: City['name']
 } | {
   type: 'game ended'
   reason: {

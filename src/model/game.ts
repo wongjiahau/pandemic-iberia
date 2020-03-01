@@ -38,6 +38,7 @@ export type Game = {
   }[]
   hospitals: CityName[]
   researchedDisease: City['color'][]
+  drawnInfectionCards: InfectionCard[]
 }
 
 export const infectionCountMarkers = [2, 2, 2, 3, 3, 4, 4]

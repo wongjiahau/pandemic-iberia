@@ -85,6 +85,7 @@ export const setupGame = (): Game => {
     railRoads: [],
     waters: [],
     hospitals: [],
-    researchedDisease: []
+    researchedDisease: [],
+    drawnInfectionCards: []
   }
 }

@@ -128,7 +128,14 @@ export const Map: React.FC<{
                   alignSelf: 'start' }}>
                   {props.infectedCities.find(infectedCity => infectedCity.cityName === city.name)?.patients
                     .map((color, index) => (
-                      <div key={index} style={{ backgroundColor: color, height: '6px', width: '6px' }} />
+                      <div key={index} 
+                        className='debut'
+                        style={{ 
+                          backgroundColor: color, 
+                          height: '6px', 
+                          width: '6px',
+                          border: '1px solid black'
+                        }} />
                     ))}
                 </div>
               </div>

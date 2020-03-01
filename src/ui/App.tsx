@@ -11,6 +11,7 @@ import { Deck } from './deck';
 import { Map } from './map';
 import { PlayerCardsInfo } from './player-cards-info';
 import { Tracker } from './tracker';
+import { CityCard } from './city-card';
 
 
 function App() {
@@ -147,6 +148,25 @@ function App() {
         </div>
         <div style={{color: 'green'}}>
           {game.currentPlayer.name}'s turn to perform action #{game.currentPlayer.numberOfPerformedActions + 1}.
+        </div>
+        <div>
+          {game.drawnInfectionCards.length > 0 &&
+            <div className='shockwave'
+              onClick={() => 
+              updateGame(executeAction({
+                type: 'use drawn infection cards', 
+                playerName: game.currentPlayer.name
+              }))}>
+              Use drawn infection cards
+            </div>}
+          {game.drawnInfectionCards.map((infectionCard, index) => (
+            <div key={index}>
+              <CityCard
+                cityColor={infectionCard.cityColor}
+                cityName={infectionCard.cityName}
+                />
+            </div>
+          ))}
         </div>
       </div>
     </div>

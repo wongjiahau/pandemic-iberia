@@ -32,14 +32,6 @@ export const getPossibleActions = ({
     }]
   }
 
-  const overloadedCity = game.infectedCities.find(city => city.patients.length > 3)
-  if(overloadedCity) {
-    return [{
-      type: 'outbreak',
-      playerName: game.currentPlayer.name,
-      cityName: overloadedCity.cityName
-    }]
-  }
   const playerWithTooManyCards = game.playerCards.find(player => player.cards.length > 7)
   if(playerWithTooManyCards) {
     return [{
@@ -51,6 +43,13 @@ export const getPossibleActions = ({
   const {currentPlayer} = game
   const playerName = currentPlayer.name
   const currentPlayerPosition = game.playerPositions.find(position => position.playerName === currentPlayer.name)
+
+  if(game.drawnInfectionCards.length > 0) {
+    return [{
+      type: 'use drawn infection cards',
+      playerName: currentPlayer.name
+    }]
+  }
 
   if(game.playerCards.flatMap(({cards}) => cards).some(card => card.type === 'epidemic')) {
     return [{

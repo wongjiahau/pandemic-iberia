@@ -1,6 +1,7 @@
 import React from 'react';
 import { Game } from '../model/game';
 import {Tooltip} from 'react-tippy'
+import { CityCard } from './city-card';
 
 export const PlayerCardsInfo: React.FC<{
   playerCards: Game['playerCards'][0],
@@ -14,16 +15,10 @@ export const PlayerCardsInfo: React.FC<{
       {props.playerCards.cards.map((card, index) => (
         card.type === 'city' 
           ?
-            <div key={index} style={{display: 'grid', gridAutoFlow: 'column', gridGap: '4px', 
-              justifyContent: 'start', alignItems: 'center'}}>
-              <div key={index} style={{backgroundColor: card.cityColor, width: '12px', height: '12px'}}/>
-              <div>
-                {card.cityName}
-              </div>
-            </div>
+            <CityCard key={index} cityColor={card.cityColor} cityName={card.cityName}/>
           :
-            <Tooltip title='Execute epidemic'>
-              <div className='shockwave' key={index} style={{fontWeight: 'bold'}} 
+            <Tooltip title='Execute epidemic' key={index}>
+              <div className='shockwave' style={{fontWeight: 'bold'}} 
                 onClick={props.onClickEpidemic}>
                 !EPIDEMIC!
               </div>

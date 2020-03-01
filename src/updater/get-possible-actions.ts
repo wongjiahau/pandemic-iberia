@@ -34,10 +34,11 @@ export const getPossibleActions = ({
 
   const playerWithTooManyCards = game.playerCards.find(player => player.cards.length > 7)
   if(playerWithTooManyCards) {
-    return [{
+    return playerWithTooManyCards.cards.map((_card, index) => ({
       type: 'discard a card',
-      playerName: playerWithTooManyCards.playerName
-    }]
+      playerName: playerWithTooManyCards.playerName,
+      cardIndex: index
+    }))
   } 
 
   const {currentPlayer} = game

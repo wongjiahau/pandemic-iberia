@@ -108,8 +108,10 @@ export const Map: React.FC<{
                   <div style={{fontWeight: 'bold', pointerEvents: 'none', fontSize: '12px'}}>
                     {props.playerPositions
                       .filter(position => position.cityName === city.name)
-                      ?.map(position => position.playerName)
-                      .join(', ')} 
+                      ?.map((position, index) => (
+                        <div key={index} className='debut'>
+                          {position.playerName}
+                        </div>))}
                   </div>
                 </div>
                 {highlightCity(

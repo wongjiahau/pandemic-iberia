@@ -12,6 +12,8 @@ import { Map } from './map';
 import { PlayerCardsInfo } from './player-cards-info';
 import { Tracker } from './tracker';
 import { CityCard } from './city-card';
+import * as shuffle from 'shuffle-array';
+import { PlayerAction } from '../model/player-action';
 
 
 function App() {
@@ -51,6 +53,18 @@ function App() {
   ]
 
   const possibleActions = getPossibleActions({game})
+
+  React.useEffect(() => {
+    console.log(possibleActions)
+    const chosenAction = shuffle.pick(possibleActions, { picks: 1 }) as unknown as PlayerAction
+    if(chosenAction) {
+      setTimeout(() => {
+        console.log(chosenAction)
+        updateGame(executeAction(chosenAction))
+      }, 1000)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(possibleActions)])
 
   return (
     <div style={{display: 'grid', height: '100vh', width: '100vw', gridTemplateColumns: '1fr auto'}}>
@@ -142,8 +156,23 @@ function App() {
         </div>
         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gridGap: '12px'}}>
           {game.playerCards.map((playerCards, index) => (
-            <PlayerCardsInfo key={index} playerCards={playerCards}
-              onClickEpidemic={() => updateGame(executeAction({type: 'epidemic'}))}/>
+            <PlayerCardsInfo 
+              key={index} 
+              playerCards={playerCards}
+              onClickEpidemic={() => updateGame(executeAction({type: 'epidemic'}))}
+              needToDiscard={
+                possibleActions.some(action => 
+                  action.type === 'discard a card'
+                  &&
+                  action.playerName === playerCards.playerName
+                )
+              }
+              discardCard={cardIndex => updateGame(executeAction({
+                type: 'discard a card',
+                playerName: game.currentPlayer.name,
+                cardIndex
+              }))}
+              />
           ))}
         </div>
         <div style={{color: 'green'}}>

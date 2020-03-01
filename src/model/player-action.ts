@@ -43,7 +43,6 @@ export type PlayerAction = {
 } | {
   type: 'outbreak' 
   cityName: City['name']
-  sourceCityName: City['name']
 } | {
   type: 'game ended'
   reason: {
@@ -59,4 +58,5 @@ export type PlayerAction = {
 } | {
   type: 'discard a card',
   playerName: Player['name']
+  cardIndex: number
 })

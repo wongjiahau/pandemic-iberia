@@ -5,6 +5,16 @@ import shuffle from 'shuffle-array';
 import { City } from '../model/cities';
 
 export const executeAction = (action: Action) => (game: Game): Game => {
+  const updatedGame = executeAction$(action)(game)
+  return cleanUpTemporaryVariables(updatedGame)
+}
+const cleanUpTemporaryVariables = (game: Game): Game => {
+  return {
+    ...game,
+    currentOutbreakedCities: []
+  }
+}
+export const executeAction$ = (action: Action) => (game: Game): Game => {
   const updateCurrentPlayer = (): Game['currentPlayer'] => {
     const { currentPlayer } = game
     const currentPlayerIndex = game.players.findIndex(player => player.name === currentPlayer.name)
@@ -122,10 +132,9 @@ export const executeAction = (action: Action) => (game: Game): Game => {
     case 'infect cities': {
       const targetCity = game.infectedCities.find(city => city.cityName === action.cityName)
       if((targetCity?.patients.length ?? 0) === 3) {
-        return executeAction({
+        return executeAction$({
           type: 'outbreak',
           cityName: action.cityName,
-          sourceCityName: action.cityName,
           playerName: game.currentPlayer.name
         })(game)
       }
@@ -166,15 +175,14 @@ export const executeAction = (action: Action) => (game: Game): Game => {
 
       const targetCity = game.infectedCities.find(city => city.cityName === lastCard.cityName)
       if (targetCity && targetCity.patients.length > 0) {
-        return executeAction({
+        return executeAction$({
           type: 'outbreak',
           cityName: targetCity.cityName,
-          sourceCityName: targetCity.cityName,
           playerName: game.currentPlayer.name,
         })(updatedGame)
       }
       else {
-        return executeAction({
+        return executeAction$({
           type: 'infect cities',
           cubes: new Array<City['color']>(3).fill(lastCard.cityColor),
           cityName: lastCard.cityName
@@ -186,20 +194,35 @@ export const executeAction = (action: Action) => (game: Game): Game => {
       if(!targetCity) {
         throw new Error(`targetCity is undefined for cityName of ${action.cityName}`)
       }
+      else if(game.currentOutbreakedCities.includes(targetCity.name)) {
+        // Don't outbreak again
+        return game
+      }
       else {
         alert(`Outbreak at ${targetCity?.name}`)
         return executeActions(targetCity.connectedTo
-          .filter(neighbour => neighbour.name !== action.sourceCityName)
           .map<Action>(neighbour => ({
             type: 'infect cities',
             cubes: [targetCity.color],
             cityName: neighbour.name
           })))({
             ...game,
-            outbreakLevel: game.outbreakLevel + 1
+            outbreakLevel: game.outbreakLevel + 1,
+            currentOutbreakedCities: [...game.currentOutbreakedCities, targetCity.name]
           })
       }
     }
+    case 'discard a card':
+      return {
+        ...game,
+        playerCards: updateArray({
+          array: game.playerCards,
+          match: ({playerName}) => action.playerName === playerName,
+          update: ({playerName, cards}) => 
+            ({playerName, cards: cards.filter((_, index) => index !== action.cardIndex)}),
+          upsert: undefined
+        })
+      }
     default:
       throw new Error(`Cannot handle ${action.type} yet`)
   }
@@ -207,6 +230,6 @@ export const executeAction = (action: Action) => (game: Game): Game => {
 
 export const executeActions = (actions: Action[]) => (game: Game) => {
   return actions.reduce((game, action) => {
-    return executeAction(action)(game)
+    return executeAction$(action)(game)
   }, game)
 }

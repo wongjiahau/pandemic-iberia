@@ -24,6 +24,7 @@ export type PlayerAction = {
   type: 'move patient towards hospital',
   from: CityName
   to: CityName
+  patientColor: City['color']
 } | {
   type: 'share knowledge'
   on: CityName

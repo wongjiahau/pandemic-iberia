@@ -163,6 +163,20 @@ export const getPossibleActions = ({
       playerName: currentPlayerName,
       by: 'train'
     })),
+    ...(currentPlayerCity?.isPort 
+        ? currentPlayerCards
+          .filter(card => 
+            card.type === 'city' && game.cities.find(city => 
+              city.name === card.cityName)?.isPort)
+          .flatMap<PlayerAction>(card => card.type === 'city'
+            ? [{
+                type: 'move',
+                by: 'ship',
+                to: card.cityName,
+                playerName: game.currentPlayer.name
+              }]
+            : []) 
+        : []),
     ...(canTreatDisease && currentPlayerCity ? [{
       type: 'treat disease' as 'treat disease',
       playerName: currentPlayerName,

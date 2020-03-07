@@ -107,7 +107,7 @@ function App() {
               return [{
                 cityName: action.to,
                 onClick,
-                tooltip: `Move to ${action.to}`
+                tooltip: `Move to ${action.to} by ${action.by}`
               }]
 
             case 'treat disease':

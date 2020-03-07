@@ -59,6 +59,17 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
           match: position => position.playerName === action.playerName,
           update: position => ({ ...position, cityName: action.to }),
           upsert: undefined
+        }),
+        playerCards: updateArray({
+          array: game.playerCards,
+          match: ({playerName}) => action.by === 'ship' 
+            ? playerName === game.currentPlayer.name
+            : false,
+          update: ({playerName, cards}) => ({
+            playerName,
+            cards: cards.filter(card => !(card.type === 'city' && card.cityName === action.to))
+          }),
+          upsert: undefined
         })
       }
     }
@@ -103,6 +114,20 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
           action.city
         ]
       }
+    }
+    case 'move patient towards hospital': {
+      return executeActions([
+        {
+          type: 'treat disease' as 'treat disease', 
+          on: action.from,
+          playerName: game.currentPlayer.name
+        },
+        {
+          type: 'infect cities' as 'infect cities', 
+          cityName: action.to,
+          cubes: [action.patientColor]
+        }
+      ])(game)
     }
     case 'research disease': {
       return {

@@ -36,7 +36,10 @@ export type Game = {
     count: number
     affectedCities: CityName[]
   }[]
-  hospitals: CityName[]
+  hospitals: {
+    cityName: CityName,
+    cityColor: City['color']
+  }[]
   researchedDisease: City['color'][]
   drawnInfectionCards: InfectionCard[]
   currentOutbreakedCities: CityName[]

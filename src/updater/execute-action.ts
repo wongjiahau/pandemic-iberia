@@ -5,6 +5,7 @@ import shuffle from 'shuffle-array';
 import { City } from '../model/cities';
 
 export const executeAction = (action: Action) => (game: Game): Game => {
+  console.log(action)
   const updatedGame = executeAction$(action)(game)
   return cleanUpTemporaryVariables(updatedGame)
 }
@@ -86,9 +87,20 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
     case 'build hospital': {
       return {
         ...game,
+        currentPlayer: updateCurrentPlayer(),
+        playerCards: updateArray({
+          array: game.playerCards,
+          match: ({playerName}) => playerName === action.playerName,
+          update: ({playerName, cards}) => ({
+            playerName,
+            cards: cards.filter(card => 
+              !(card.type === 'city' && card.cityName === action.city.cityName)) 
+          }),
+          upsert: undefined
+        }),
         hospitals: [
-          ...game.hospitals,
-          action.on
+          ...game.hospitals.filter(city => city.cityColor !== action.city.cityColor),
+          action.city
         ]
       }
     }

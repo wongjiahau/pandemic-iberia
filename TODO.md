@@ -3,7 +3,7 @@ Game feature
 [x] move by railroads
 [] put water
 [] share knowledge
-[] build hospital
+[x] build hospital
 [] move patient towards hospital
 [] hospital overrun
 [] research disease

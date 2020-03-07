@@ -12,8 +12,14 @@ export type PlayerAction = {
   type: 'build railroads'
   between: [CityName, CityName]
 } | {
-  type: 'build hospital' | 'treat disease'
+  type: 'treat disease'
   on: CityName
+} | {
+  type: 'build hospital',
+  city: {
+    cityName: CityName,
+    cityColor: City['color']
+  }
 } | {
   type: 'share knowledge'
   on: CityName

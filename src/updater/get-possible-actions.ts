@@ -52,8 +52,10 @@ export const getPossibleActions = ({
   } 
 
   const {currentPlayer} = game
-  const playerName = currentPlayer.name
+  const currentPlayerName = currentPlayer.name
   const currentPlayerPosition = game.playerPositions.find(position => position.playerName === currentPlayer.name)
+  const currentPlayerCards = game.playerCards
+    .find(({playerName}) => playerName === currentPlayer.name)?.cards ?? []
 
   if(game.drawnInfectionCards.length > 0) {
     return [{
@@ -69,16 +71,15 @@ export const getPossibleActions = ({
     }]
   }
   if(!currentPlayerPosition) {
-    return game.playerCards
-      .find(playerCards => playerCards.playerName === currentPlayer.name)?.cards
+    return currentPlayerCards
       .flatMap(card => card.type === 'city' ? [card.cityName] : [])
       .map(cityName => {
         return {
           type: 'set starting position',
-          playerName,
+          playerName: currentPlayerName,
           cityName
         } as PlayerAction
-      }) ?? []
+      })
   }
 
   if(currentPlayer.numberOfPerformedActions === 4 && !currentPlayer.drawnPlayerCards) {
@@ -96,54 +97,65 @@ export const getPossibleActions = ({
     }]
   }
 
-  const playerPosition = game.playerPositions.find(position => position.playerName === playerName)
-  const city = game.cities.find(city => city.name === playerPosition?.cityName)
+  const playerPosition = game.playerPositions.find(position => position.playerName === currentPlayerName)
+  const currentPlayerCity = game.cities.find(city => city.name === playerPosition?.cityName)
 
-  const builtRailRoads = game.railRoads.filter(({between: [a, b]}) => a === city?.name || b === city?.name)
-  const possbleRailRoadsSpace = city 
-    ? city.connectedTo
+  const builtRailRoads = game.railRoads
+    .filter(({between: [a, b]}) => a === currentPlayerCity?.name || b === currentPlayerCity?.name)
+  const possbleRailRoadsSpace = currentPlayerCity 
+    ? currentPlayerCity.connectedTo
       .filter(neighbour => !neighbour.cannotBuildRailRoad)
       .filter(neighbour => !builtRailRoads
         .some(({between: [a, b]}) => a === neighbour.name || b === neighbour.name))
-      .map(neighbour => [city.name, neighbour.name] as [CityName, CityName])
+      .map(neighbour => [currentPlayerCity.name, neighbour.name] as [CityName, CityName])
     : []
 
   const canBuildRailRoads = game.railRoads.length < 20 &&
-    builtRailRoads.length < (city?.connectedTo ?? []).length
+    builtRailRoads.length < (currentPlayerCity?.connectedTo ?? []).length
 
   const canTreatDisease = 
-    (game.infectedCities.find(({cityName}) => cityName === city?.name)?.patients ?? []).length > 0
+    (game.infectedCities.find(({cityName}) => cityName === currentPlayerCity?.name)?.patients ?? []).length > 0
 
   const possibleDestinationsViaRailway = 
-    city
+    currentPlayerCity
       ? findPossibleDestinationsViaRailways({
-          city,
+          city: currentPlayerCity,
           railRoads: game.railRoads,
           allCities: game.cities
         })
-        .filter(cityName => cityName !== city.name)
+        .filter(cityName => cityName !== currentPlayerCity.name)
       : []
   return [
-    ...(city?.connectedTo ?? []).map<PlayerAction>(neighbour => ({
+    ...(currentPlayerCity && currentPlayerCards.some(card => card.type === 'city' && card.cityName === currentPlayerPosition.cityName) 
+      ? [{
+          type: 'build hospital' as 'build hospital', 
+          playerName: currentPlayerName, 
+          city: {
+            cityName: currentPlayerCity.name,
+            cityColor: currentPlayerCity.color
+          }
+        }]
+      : []),
+    ...(currentPlayerCity?.connectedTo ?? []).map<PlayerAction>(neighbour => ({
       type: 'move',
       to: neighbour.name,
-      playerName,
+      playerName: currentPlayerName,
       by: 'carriage/boat'
     })),
     ...possibleDestinationsViaRailway.map<PlayerAction>(destination => ({
       type: 'move',
       to: destination,
-      playerName,
+      playerName: currentPlayerName,
       by: 'train'
     })),
-    ...(canTreatDisease && city ? [{
+    ...(canTreatDisease && currentPlayerCity ? [{
       type: 'treat disease' as 'treat disease',
-      playerName,
-      on: city.name
+      playerName: currentPlayerName,
+      on: currentPlayerCity.name
     }] : []),
     ...(canBuildRailRoads ? possbleRailRoadsSpace.map(between => ({
       type: 'build railroads' as 'build railroads',
-      playerName,
+      playerName: currentPlayerName,
       between
     })) : [])
   ]

@@ -13,6 +13,7 @@ export const Map: React.FC<{
         row: number;
     };
   }[],
+  hospitals: Game['hospitals']
   railRoads: Game['railRoads']
   infectedCities: Game['infectedCities']
   playerPositions: Game['playerPositions']
@@ -124,11 +125,15 @@ export const Map: React.FC<{
                       width: size,
                       height: size,
                       pointerEvents: 'auto'
-                    }} />
+                    }}>
+                    {props.hospitals.some(hospital => hospital.cityName === city.name)
+                      && <div> 🏥 </div>}
+                  </div>
                 )}
                 <div style={{ display: 'grid', gridAutoFlow: 'column', gridGap: '4px', pointerEvents: 'none', 
                   alignSelf: 'start' }}>
-                  {props.infectedCities.find(infectedCity => infectedCity.cityName === city.name)?.patients
+                  {props.infectedCities
+                    .find(infectedCity => infectedCity.cityName === city.name)?.patients
                     .map((color, index) => (
                       <div key={index} 
                         className='debut'

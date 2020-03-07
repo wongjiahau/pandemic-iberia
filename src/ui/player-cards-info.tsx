@@ -5,43 +5,42 @@ import { CityCard } from './city-card';
 
 export const PlayerCardsInfo: React.FC<{
   playerCards: Game['playerCards'][0],
-  onClickEpidemic: () => void
-  discardCard: (cardIndex: number) => void
-  needToDiscard: boolean
+  highlightCard: (card: Game['playerCards'][0]['cards'][0], cardIndex: number) => {
+    needHighlight: boolean
+    tooltip: string
+    onClick: () => void
+  }
 }> = props => {
   return (
     <div style={{display: 'grid', alignContent: 'start', gridGap: '4px'}}>
       <div style={{fontWeight: 'bold'}}>
         {props.playerCards.playerName}
       </div>
-      {props.playerCards.cards.map((card, index) => (
-        card.type === 'city' 
-          ?
-            <Tooltip key={index} 
-              open={props.needToDiscard ? undefined : false}
-              title={props.needToDiscard ? `Discard ${card.cityName}` : ''}>
-              <div
-                className={props.needToDiscard ? 'animated infinite flash' : undefined}
-                style={{cursor: props.needToDiscard ? 'pointer' : undefined}}
-                onClick={
-                  props.needToDiscard 
-                    ? () => props.discardCard(index) 
-                    : () => {}
-                }>
-                <CityCard 
-                  cityColor={card.cityColor} 
-                  cityName={card.cityName}
-                  />
-              </div>
-            </Tooltip>
-          :
-            <Tooltip title='Execute epidemic' key={index}>
-              <div className='shockwave' style={{fontWeight: 'bold'}} 
-                onClick={props.onClickEpidemic}>
-                !EPIDEMIC!
-              </div>
-            </Tooltip>
-      ))}
+      {props.playerCards.cards.map((card, index) => { 
+        const {needHighlight, tooltip, onClick} = props.highlightCard(card, index)
+        return (
+          <Tooltip key={index + needHighlight.toString()} 
+            arrow
+            open={needHighlight ? undefined : false}
+            title={needHighlight ? tooltip : undefined}>
+            <div
+              className={needHighlight ? 'animated infinite flash' : undefined}
+              style={{cursor: needHighlight ? 'pointer' : undefined}}
+              onClick={needHighlight ? onClick : undefined}>
+              {card.type === 'city'
+                ?
+                  <CityCard 
+                    cityColor={card.cityColor} 
+                    cityName={card.cityName}
+                    />
+                : 
+                  <div style={{fontWeight: 'bold'}}> 
+                    !EPIDEMIC!
+                  </div>}
+            </div>
+          </Tooltip>
+        )
+  })}
     </div>
   )
 }

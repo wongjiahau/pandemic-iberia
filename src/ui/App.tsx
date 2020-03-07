@@ -55,13 +55,13 @@ function App() {
   const possibleActions = getPossibleActions({game})
 
   React.useEffect(() => {
-    console.log(possibleActions)
+
     const chosenAction = shuffle.pick(possibleActions, { picks: 1 }) as unknown as PlayerAction
     if(chosenAction) {
       setTimeout(() => {
         console.log(chosenAction)
         updateGame(executeAction(chosenAction))
-      }, 500)
+      }, 1000)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(possibleActions)])
@@ -70,6 +70,7 @@ function App() {
     <div style={{display: 'grid', height: '100vh', width: '100vw', gridTemplateColumns: '1fr auto'}}>
       <Map 
         cities={game.cities} 
+        hospitals={game.hospitals}
         infectedCities={game.infectedCities} 
         playerPositions={game.playerPositions}
         adjacentRegions={adjecentRegions}
@@ -159,19 +160,48 @@ function App() {
             <PlayerCardsInfo 
               key={index} 
               playerCards={playerCards}
-              onClickEpidemic={() => updateGame(executeAction({type: 'epidemic'}))}
-              needToDiscard={
-                possibleActions.some(action => 
-                  action.type === 'discard a card'
+              highlightCard={(card, cardIndex) => {
+                const discardCardAction = possibleActions.find(
+                  action => action.type === 'discard a card'
                   &&
                   action.playerName === playerCards.playerName
                 )
-              }
-              discardCard={cardIndex => updateGame(executeAction({
-                type: 'discard a card',
-                playerName: game.currentPlayer.name,
-                cardIndex
-              }))}
+                const epidemicAction = possibleActions
+                  .find(action => action.type === 'epidemic')
+
+                const buildHospitalAction = possibleActions
+                  .find(action => action.type === 'build hospital') 
+
+                if(discardCardAction) {
+                  return {
+                    needHighlight: true,
+                    onClick: () => updateGame(executeAction(discardCardAction)),
+                    tooltip: `Discard ${card.type === 'city' ? card.cityName : ''}`
+                  }
+                }
+                else if(epidemicAction) {
+                  return {
+                    needHighlight: card.type === 'epidemic',
+                    onClick: () => updateGame(executeAction(epidemicAction)),
+                    tooltip: 'Launch epidemic!'
+                  }
+                }
+                else if(buildHospitalAction && buildHospitalAction.type === 'build hospital') {
+                  return {
+                    needHighlight: card.type === 'city' 
+                      && card.cityName === buildHospitalAction.city.cityName,
+                    onClick: () => updateGame(executeAction(buildHospitalAction)),
+                    tooltip: `Build hospital on ${buildHospitalAction.city.cityName}`
+                  }
+                }
+                else {
+                  return {
+                    needHighlight: false,
+                    onClick: () => {},
+                    tooltip: ''
+                  }
+                }
+              }}
               />
           ))}
         </div>

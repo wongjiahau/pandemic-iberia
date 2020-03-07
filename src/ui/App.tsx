@@ -14,6 +14,7 @@ import { Tracker } from './tracker';
 import { CityCard } from './city-card';
 import * as shuffle from 'shuffle-array';
 import { PlayerAction } from '../model/player-action';
+import { Tooltip } from 'react-tippy';
 
 
 function App() {
@@ -57,14 +58,18 @@ function App() {
   React.useEffect(() => {
 
     const chosenAction = shuffle.pick(possibleActions, { picks: 1 }) as unknown as PlayerAction
-    if(chosenAction) {
-      setTimeout(() => {
-        console.log(chosenAction)
-        updateGame(executeAction(chosenAction))
-      }, 1000)
-    }
+    // if(chosenAction) {
+    //   setTimeout(() => {
+    //     console.log(chosenAction)
+    //     updateGame(executeAction(chosenAction))
+    //   }, 1000)
+    // }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(possibleActions)])
+
+  const allColors = game.cities
+    .map(city => city.color)
+    .filter((x, i, xs) => i === xs.indexOf(x))
 
   return (
     <div style={{display: 'grid', height: '100vh', width: '100vw', gridTemplateColumns: '1fr auto'}}>
@@ -155,7 +160,32 @@ function App() {
             }/>
           <Deck label='Discarded Infection Cards' cards={game.infectionDiscardPile} cardColor='pink'/>
         </div>
+        <div>
+          <div style={{fontWeight: 'bold'}}>Researched Diseases</div>
+          {allColors.map((color, index) => { 
+            const canResearch = possibleActions.some(action => 
+              action.type === 'research disease' && action.color === color)
+
+            return (
+              <Tooltip key={index}
+                title={`Research ${color} disease`}
+                open={canResearch ? undefined : false}>
+                <div className={canResearch ? 'shockwave' : undefined} 
+                  style={{display: 'grid', gridAutoFlow: 'column', 
+                    justifyContent: 'start', alignItems: 'center', gridGap: '4px'}}>
+                  <div style={{height: '8px', width: '8px', backgroundColor: color}}/>
+                  {color}
+                  {game.researchedDisease.includes(color) && 
+                    <div className='debut'>
+                      🔬
+                    </div>}
+                </div>
+              </Tooltip>
+            )
+  })}
+        </div>
         <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gridGap: '12px'}}>
+          <div style={{fontWeight: 'bold', gridColumn: '1 / span 2'}}>Players</div>
           {game.playerCards.map((playerCards, index) => (
             <PlayerCardsInfo 
               key={index} 

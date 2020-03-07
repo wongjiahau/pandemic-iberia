@@ -6,7 +6,7 @@ Game feature
 [x] build hospital
 [] move patient towards hospital
 [] hospital overrun
-[] research disease
+[x] research disease
 [] move by ship
 [] special player power
 [] special cards

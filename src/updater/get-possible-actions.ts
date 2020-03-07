@@ -125,7 +125,22 @@ export const getPossibleActions = ({
         })
         .filter(cityName => cityName !== currentPlayerCity.name)
       : []
+
+
   return [
+    ...(currentPlayerCity
+      && game.hospitals.some(hospital => hospital.cityName === currentPlayerCity?.name)
+      && currentPlayerCards
+        .filter(card => 
+          card.type === 'city' && card.cityName === currentPlayerCity?.name)
+        .length >= 5
+        ? [{
+            type: 'research disease' as 'research disease',
+            color: currentPlayerCity.color,
+            playerName: currentPlayerName
+          }]
+        : []
+      ),
     ...(currentPlayerCity && currentPlayerCards.some(card => card.type === 'city' && card.cityName === currentPlayerPosition.cityName) 
       ? [{
           type: 'build hospital' as 'build hospital', 

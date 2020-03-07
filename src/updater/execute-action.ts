@@ -104,6 +104,16 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         ]
       }
     }
+    case 'research disease': {
+      return {
+        ...game,
+        currentPlayer: updateCurrentPlayer(),
+        researchedDisease: [
+          ...game.researchedDisease,
+          action.color
+        ]
+      }
+    }
     case 'draw 2 player cards': {
       return {
         ...game,

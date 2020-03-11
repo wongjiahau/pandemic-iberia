@@ -81,6 +81,20 @@ function App() {
         playerPositions={game.playerPositions}
         adjacentRegions={adjecentRegions}
         railRoads={game.railRoads}
+        movePatientsPath={possibleActions.flatMap(action => {
+          const onClick = () => updateGame(executeAction(action))
+          switch(action.type) {
+            case 'move patient towards hospital':
+              return [{
+                onClick,
+                from: action.from, 
+                to: action.to,
+                tooltip: `Move ${action.patientColor} patient from ${action.from} to ${action.to}`
+              }]
+            default:
+              return []
+          }
+        })}
         highlightedRoads={possibleActions.flatMap(action => {
           const onClick = () => updateGame(executeAction(action))
           switch(action.type) {
@@ -91,12 +105,6 @@ function App() {
                 tooltip: `Build railroad between ${action.between[0]} and ${action.between[1]}`
               }]
 
-            case 'move patient towards hospital':
-              return [{
-                onClick,
-                between: [action.from, action.to],
-                tooltip: `Move ${action.patientColor} patient from ${action.from} to ${action.to}`
-              }]
             default:
               return []
           }

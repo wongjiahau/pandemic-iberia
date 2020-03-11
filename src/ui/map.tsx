@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArcherContainer, ArcherElement } from 'react-archer';
+import { ArcherContainer, ArcherElement, Relation } from 'react-archer';
 import { City, CityName } from '../model/cities';
 import { Game } from '../model/game';
 import {Tooltip} from 'react-tippy'
@@ -26,6 +26,12 @@ export const Map: React.FC<{
     between: [CityName, CityName]
     onClick: () => void
     tooltip: string
+  }[]
+  movePatientsPath: {
+    from: CityName
+    to: CityName
+    tooltip: string
+    onClick: () => void
   }[]
 }> = props => {
   const size = '2.4vmin'
@@ -81,21 +87,41 @@ export const Map: React.FC<{
                 display: 'grid', 
                 pointerEvents: 'none'
               }}
-              relations={city.connectedTo.map(neighbour => ({
-                targetId: getCityId(neighbour.name),
-                targetAnchor: 'middle',
-                sourceAnchor: 'middle',
-                ...(neighbour.cannotBuildRailRoad 
-                  ? { style: { strokeDasharray: '12' } } 
-                  : props.railRoads.some(({between: [a, b]}) => 
-                      (a === city.name && b === neighbour.name)
-                        ||
-                      (b === city.name && a === neighbour.name)
-                    )
-                    ? {style: {strokeWidth: 16}}
-                    : {style: {strokeWidth: 2}}),
-                label: roadLabel(neighbour.name)
-              }))}
+              relations={[
+                ...city.connectedTo
+                  .filter(neighbour => !props.movePatientsPath
+                    .some(path => path.from === city.name && path.to === neighbour.name))
+                  .map(neighbour => ({
+                    targetId: getCityId(neighbour.name),
+                    targetAnchor: 'middle' as 'middle',
+                    sourceAnchor: 'middle' as 'middle',
+                    ...(neighbour.cannotBuildRailRoad 
+                      ? { style: { strokeDasharray: '12' } } 
+                      : props.railRoads.some(({between: [a, b]}) => 
+                          (a === city.name && b === neighbour.name)
+                            ||
+                          (b === city.name && a === neighbour.name)
+                        )
+                        ? {style: {strokeWidth: 16}}
+                        : {style: {strokeWidth: 2}}),
+                    label: roadLabel(neighbour.name)
+                  })),
+                ...props.movePatientsPath
+                  .filter(path => path.from === city.name)
+                  .map<Relation>(path => ({
+                    targetId: getCityId(path.to),
+                    targetAnchor: 'middle' as 'middle',
+                    sourceAnchor: 'middle' as 'middle',
+                    style: {strokeColor: 'red',},
+                    label: 
+                      <Tooltip arrow title={path.tooltip} >
+                        <div className='wiggle' style={{height: '24px', width: '24px', zIndex: 100}} 
+                          onClick={path.onClick}> 
+                          🚑 
+                        </div>
+                      </Tooltip>
+                  }))
+              ]}
             >
               <div style={{
                 display: 'grid', justifyItems: 'center', alignItems: 'center',

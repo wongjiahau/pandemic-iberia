@@ -1,6 +1,7 @@
+import { CityName } from './../model/cities';
 import { PlayerAction } from './../model/player-action';
 import { Game } from '../model/game';
-import { getShortestPaths } from './get-shortest-paths';
+import { getShortestPaths, Path } from './get-shortest-paths';
 
 export const getPatientsToMove = ({
   game,
@@ -11,6 +12,7 @@ export const getPatientsToMove = ({
 }): PlayerAction[] => {
   const infectedNeighbours = game.infectedCities
     .filter(city => city.patients.includes(targetHospital.cityColor))
+    .filter(city => city.cityName !== targetHospital.cityName)
 
   const routes = infectedNeighbours
     .map(neighbour => ({
@@ -32,7 +34,7 @@ export const getPatientsToMove = ({
     .filter(route => route.shortestPaths[0].length === shortestDistance)
     .flatMap<PlayerAction>(route => {
       return route.shortestPaths.flatMap(path => {
-        const nextStop = path[1] // Implement getNextStop
+        const nextStop = getNextStop(game, path)
         if(nextStop) {
           return [{
             type: 'move patient towards hospital',
@@ -47,4 +49,21 @@ export const getPatientsToMove = ({
         }
       })
     })
+}
+
+const getNextStop = (game: Game, path: Path): CityName | undefined => {
+  const pairs = path
+    .map((_, index) => {
+      return path.slice(index, index + 2)
+    })
+    .filter(pairs => pairs.length === 2)
+
+  return pairs
+    .reduce<CityName | undefined>((nextStop, [from, to], index) => 
+      nextStop 
+        ? nextStop 
+        : game.railRoads.some(({between: [a, b]}) => 
+        (from === a && to === b) || (from === b && to === a))
+          ? index === pairs.length - 1 ? to : undefined
+          : to, undefined)
 }

@@ -54,6 +54,7 @@ function App() {
   ]
 
   const possibleActions = getPossibleActions({game})
+  console.log(possibleActions)
 
   React.useEffect(() => {
 
@@ -62,7 +63,7 @@ function App() {
     //   setTimeout(() => {
     //     console.log(chosenAction)
     //     updateGame(executeAction(chosenAction))
-    //   }, 1000)
+    //   }, 500)
     // }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(possibleActions)])
@@ -88,6 +89,13 @@ function App() {
                 onClick,
                 between: action.between,
                 tooltip: `Build railroad between ${action.between[0]} and ${action.between[1]}`
+              }]
+
+            case 'move patient towards hospital':
+              return [{
+                onClick,
+                between: [action.from, action.to],
+                tooltip: `Move ${action.patientColor} patient from ${action.from} to ${action.to}`
               }]
             default:
               return []

@@ -27,16 +27,17 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         numberOfPerformedActions: numberOfPerformedActions + 1
       }
     }
-    else if (numberOfPerformedActions === 4 && !drawnPlayerCards) {
+    else if (!drawnPlayerCards) {
       return {
         ...currentPlayer,
         drawnPlayerCards: true
       }
     }
-    else if (numberOfPerformedActions === 4 && drawnPlayerCards && !drawnInfectionCards) {
+    else if (!drawnInfectionCards) {
       return {
         name: nextPlayer.name,
-        numberOfPerformedActions: 0
+        numberOfPerformedActions: 0,
+        movedPatientColors: []
       }
     }
     else {
@@ -76,7 +77,9 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
     case 'treat disease': {
       return {
         ...game,
-        currentPlayer: updateCurrentPlayer(),
+        currentPlayer: action.dontUpdatePlayerTurn 
+          ? game.currentPlayer 
+          : updateCurrentPlayer(),
         infectedCities: updateArray({
           array: game.infectedCities,
           match: city => city.cityName === action.on,
@@ -120,14 +123,24 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         {
           type: 'treat disease' as 'treat disease', 
           on: action.from,
-          playerName: game.currentPlayer.name
+          playerName: game.currentPlayer.name,
+          dontUpdatePlayerTurn: true
         },
         {
           type: 'infect cities' as 'infect cities', 
           cityName: action.to,
           cubes: [action.patientColor]
         }
-      ])(game)
+      ])({
+        ...game,
+        currentPlayer: {
+          ...game.currentPlayer,
+          movedPatientColors: [
+            ...game.currentPlayer.movedPatientColors,
+            action.patientColor
+          ]
+        }
+      })
     }
     case 'research disease': {
       return {

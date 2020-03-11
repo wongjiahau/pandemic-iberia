@@ -1,6 +1,7 @@
 import { PlayerAction } from '../model/player-action';
 import { City, CityName } from './../model/cities';
 import { Game } from './../model/game';
+import { getPatientsToMove } from './get-patients-to-move';
 
 export const getPossibleActions = ({
   game
@@ -82,15 +83,22 @@ export const getPossibleActions = ({
       })
   }
 
-  if(currentPlayer.numberOfPerformedActions === 4 && !currentPlayer.drawnPlayerCards) {
+  const finishedPerformingActions = currentPlayer.numberOfPerformedActions === 4
+
+  const patientUnmovedHospital = game.hospitals.find(hospital => !game.currentPlayer.movedPatientColors.includes(hospital.cityColor))
+
+  if(finishedPerformingActions && patientUnmovedHospital) {
+    return getPatientsToMove({game, targetHospital: patientUnmovedHospital})
+  }
+
+  if(finishedPerformingActions && !currentPlayer.drawnPlayerCards) {
     return [{
       type: 'draw 2 player cards',
       playerName: currentPlayer.name
     }]
   }
 
-  if(currentPlayer.numberOfPerformedActions === 4 && currentPlayer.drawnPlayerCards 
-      && !currentPlayer.drawnInfectionCards) {
+  if(finishedPerformingActions && !currentPlayer.drawnInfectionCards) {
     return [{
       type: 'draw infection cards',
       playerName: currentPlayer.name

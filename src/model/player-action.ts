@@ -14,6 +14,7 @@ export type PlayerAction = {
 } | {
   type: 'treat disease'
   on: CityName
+  dontUpdatePlayerTurn?: boolean
 } | {
   type: 'build hospital',
   city: {

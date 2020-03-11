@@ -62,7 +62,8 @@ export const setupGame = (): Game => {
     players,
     currentPlayer: {
       name: players[0]?.name,
-      numberOfPerformedActions: 0
+      numberOfPerformedActions: 0,
+      movedPatientColors: []
     },
     playerPositions: [],
     playerCards, 

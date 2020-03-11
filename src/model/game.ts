@@ -7,6 +7,7 @@ export type Game = {
   currentPlayer: {
     name: Player['name'],
     numberOfPerformedActions: number // 0 | 1 | 2 | 3
+    movedPatientColors: City['color'][]
     drawnPlayerCards?: boolean
     drawnInfectionCards?: boolean
   }

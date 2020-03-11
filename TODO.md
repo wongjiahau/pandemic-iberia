@@ -4,7 +4,8 @@ Game feature
 [] put water
 [] share knowledge
 [x] build hospital
-[] move patient towards hospital
+[x] move patient towards hospital
+[] move patient towards hospital via railway
 [] hospital overrun
 [x] research disease
 [x] move by ship

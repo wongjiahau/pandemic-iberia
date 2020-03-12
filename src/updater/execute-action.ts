@@ -117,6 +117,9 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
       }
     }
     case 'move patient': {
+      const remaningPatientInOverranHospital = game.infectedCities
+        .find(city => city.cityName === game.overrunHospital?.cityName)
+      
       return executeActions([
         {
           type: 'treat disease' as 'treat disease', 
@@ -137,7 +140,11 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
             ...game.currentPlayer.movedPatientColors,
             action.patientColor
           ]
-        }
+        },
+        overrunHospital: 
+          (remaningPatientInOverranHospital?.patients.length ?? 0) === 1
+            ? undefined
+            : game.overrunHospital
       })
     }
     case 'research disease': {
@@ -229,7 +236,8 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         }),
         overrunHospital: {
           cityName: action.cityName,
-        }
+        },
+        outbreakLevel: game.outbreakLevel + 1
       }
     }
     case 'epidemic': {
@@ -300,11 +308,13 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
           array: game.playerCards,
           match: ({playerName}) => action.playerName === playerName,
           update: ({playerName, cards}) => 
-            ({playerName, cards: cards.filter((_, index) => index !== action.cardIndex)}),
+            ({playerName, cards: cards.filter(
+              card => !(card.type === 'city' && card.cityName === action.cardName))}),
           upsert: undefined
         })
       }
     default:
+      alert(JSON.stringify(action, null, 2))
       throw new Error(`Cannot handle ${action.type} yet`)
   }
 }

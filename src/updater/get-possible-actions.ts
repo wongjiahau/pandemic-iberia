@@ -63,6 +63,7 @@ export const getPossibleActions = ({
         from: overrunHospitalCityName,
         playerName: game.currentPlayer.name,
         to: neighbour.name,
+        direction: 'flee from hospital',
         patientColor: (overrunHospitalCity?.patients ?? [])[0]
       }
     })
@@ -70,11 +71,18 @@ export const getPossibleActions = ({
 
   const playerWithTooManyCards = game.playerCards.find(player => player.cards.length > 7)
   if(playerWithTooManyCards) {
-    return playerWithTooManyCards.cards.map((_card, index) => ({
-      type: 'discard a card',
-      playerName: playerWithTooManyCards.playerName,
-      cardIndex: index
-    }))
+    return playerWithTooManyCards.cards.flatMap((card) => {
+      if(card.type === 'epidemic') {
+        return []
+      }
+      else {
+        return [{
+          type: 'discard a card',
+          playerName: playerWithTooManyCards.playerName,
+          cardName: card.cityName
+        }]
+      }
+    })
   } 
 
   const {currentPlayer} = game

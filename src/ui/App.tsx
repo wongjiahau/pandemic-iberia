@@ -15,6 +15,7 @@ import { CityCard } from './city-card';
 import * as shuffle from 'shuffle-array';
 import { PlayerAction } from '../model/player-action';
 import { Tooltip } from 'react-tippy';
+import { naivePlayer } from '../ai/naive';
 
 
 function App() {
@@ -54,19 +55,23 @@ function App() {
   ]
 
   const possibleActions = getPossibleActions({game})
-  console.log(possibleActions)
+  const lastUpdated = Date.now()
+
+  React.useEffect(() => {
+    naivePlayer()
+  }, [])
 
   React.useEffect(() => {
 
     const chosenAction = shuffle.pick(possibleActions, { picks: 1 }) as unknown as PlayerAction
-    // if(chosenAction) {
-    //   setTimeout(() => {
-    //     console.log(chosenAction)
-    //     updateGame(executeAction(chosenAction))
-    //   }, 500)
-    // }
+    if(chosenAction) {
+      setTimeout(() => {
+        console.log(chosenAction)
+        updateGame(executeAction(chosenAction))
+      }, 500)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(possibleActions)])
+  }, [lastUpdated])
 
   const allColors = game.cities
     .map(city => city.color)

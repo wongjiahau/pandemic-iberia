@@ -9,6 +9,7 @@ Game feature
 [x] hospital overrun
 [x] research disease
 [x] move by ship
+[x] fix hospital overrun bug (once overrun will be forever overrun)
 [] special player power
 [] special cards
 

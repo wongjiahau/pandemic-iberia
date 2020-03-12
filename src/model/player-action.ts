@@ -26,6 +26,7 @@ export type PlayerAction = {
   from: CityName
   to: CityName
   patientColor: City['color']
+  direction: 'towards hospital' | 'flee from hospital'
 } | {
   type: 'share knowledge'
   on: CityName
@@ -70,5 +71,5 @@ export type PlayerAction = {
 } | {
   type: 'discard a card',
   playerName: Player['name']
-  cardIndex: number
+  cardName: CityName
 })

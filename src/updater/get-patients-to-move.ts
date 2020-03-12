@@ -41,7 +41,8 @@ export const getPatientsToMove = ({
             from: route.departure.cityName,
             to: nextStop,
             playerName: game.currentPlayer.name,
-            patientColor: targetHospital.cityColor
+            patientColor: targetHospital.cityColor,
+            direction: 'towards hospital'
           }]
         }
         else {

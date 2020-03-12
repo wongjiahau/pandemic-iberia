@@ -88,6 +88,7 @@ export const setupGame = (): Game => {
     hospitals: [],
     researchedDisease: [],
     drawnInfectionCards: [],
-    currentOutbreakedCities: []
+    currentOutbreakedCities: [],
+    overrunHospital: undefined
   }
 }

@@ -5,7 +5,6 @@ import shuffle from 'shuffle-array';
 import { City } from '../model/cities';
 
 export const executeAction = (action: Action) => (game: Game): Game => {
-  console.log(action)
   const updatedGame = executeAction$(action)(game)
   return cleanUpTemporaryVariables(updatedGame)
 }
@@ -41,7 +40,6 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
       }
     }
     else {
-      console.log(game)
       throw new Error(`Shouldn't reach here. The game state is as above.`)
     }
   }
@@ -118,7 +116,7 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         ]
       }
     }
-    case 'move patient towards hospital': {
+    case 'move patient': {
       return executeActions([
         {
           type: 'treat disease' as 'treat disease', 
@@ -191,7 +189,16 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
     }
     case 'infect cities': {
       const targetCity = game.infectedCities.find(city => city.cityName === action.cityName)
-      if((targetCity?.patients.length ?? 0) === 3) {
+      const hasHospital = game.hospitals.some(hospital => hospital.cityName === targetCity?.cityName)
+      const crowded = (targetCity?.patients.length ?? 0) === 3
+      if(crowded && hasHospital) {
+        return executeAction$({
+          type: 'overrun hospital',
+          cityName: action.cityName,
+          patientColor: action.cubes[0]
+        })(game)
+      }
+      else if(crowded && !hasHospital) {
         return executeAction$({
           type: 'outbreak',
           cityName: action.cityName,
@@ -208,6 +215,20 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
               ({ cityName, patients: [...patients, ...action.cubes] }),
             upsert: { cityName: action.cityName, patients: action.cubes }
           })
+        }
+      }
+    }
+    case 'overrun hospital': {
+      return {
+        ...game,
+        infectedCities: updateArray({
+          array: game.infectedCities,
+          match: city => city.cityName === action.cityName,
+          update: city => ({...city, patients: [...city.patients, action.patientColor]}),
+          upsert: undefined
+        }),
+        overrunHospital: {
+          cityName: action.cityName,
         }
       }
     }
@@ -259,7 +280,7 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         return game
       }
       else {
-        alert(`Outbreak at ${targetCity?.name}`)
+        // alert(`Outbreak at ${targetCity?.name}`)
         return executeActions(targetCity.connectedTo
           .map<Action>(neighbour => ({
             type: 'infect cities',

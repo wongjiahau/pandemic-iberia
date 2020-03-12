@@ -13,6 +13,7 @@ export type AutomatedAction = {
 } | {
   type: 'overrun hospital'
   cityName: City['name']
+  patientColor: City['color']
 } | {
   type: 'move patients'
   from: City['name']

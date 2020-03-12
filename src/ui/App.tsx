@@ -84,7 +84,7 @@ function App() {
         movePatientsPath={possibleActions.flatMap(action => {
           const onClick = () => updateGame(executeAction(action))
           switch(action.type) {
-            case 'move patient towards hospital':
+            case 'move patient':
               return [{
                 onClick,
                 from: action.from, 

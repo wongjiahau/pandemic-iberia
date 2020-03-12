@@ -22,7 +22,7 @@ export type PlayerAction = {
     cityColor: City['color']
   }
 } | {
-  type: 'move patient towards hospital',
+  type: 'move patient',
   from: CityName
   to: CityName
   patientColor: City['color']

@@ -8,6 +8,16 @@ export const getPossibleActions = ({
 }: {
   game: Game
 }): PlayerAction[] => {
+  if(game.researchedDisease.length === 4) {
+    return [{
+      type: 'game ended',
+      playerName: game.currentPlayer.name,
+      reason: {
+        type: 'four diseases cured'
+      }
+    }]
+  }
+
   if(game.playerDeck.length === 0) {
     return [{
       type: 'game ended',
@@ -41,6 +51,21 @@ export const getPossibleActions = ({
         color: overloadedDisease
       }
     }]
+  }
+
+  const overrunHospitalCityName = game.overrunHospital?.cityName
+  const overrunHospitalCity = game.infectedCities.find(city => city.cityName === game.overrunHospital?.cityName) 
+  if(overrunHospitalCityName && (overrunHospitalCity?.patients.length ?? 0) > 0) {
+    const city = game.cities.find(city => city.name === game.overrunHospital?.cityName)
+    return (city?.connectedTo ?? []).map<PlayerAction>(neighbour => {
+      return {
+        type: 'move patient',
+        from: overrunHospitalCityName,
+        playerName: game.currentPlayer.name,
+        to: neighbour.name,
+        patientColor: (overrunHospitalCity?.patients ?? [])[0]
+      }
+    })
   }
 
   const playerWithTooManyCards = game.playerCards.find(player => player.cards.length > 7)

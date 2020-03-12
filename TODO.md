@@ -6,7 +6,7 @@ Game feature
 [x] build hospital
 [x] move patient towards hospital
 [x] move patient towards hospital via railway
-[] hospital overrun
+[x] hospital overrun
 [x] research disease
 [x] move by ship
 [] special player power

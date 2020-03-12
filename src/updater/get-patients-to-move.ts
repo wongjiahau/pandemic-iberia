@@ -37,7 +37,7 @@ export const getPatientsToMove = ({
         const nextStop = getNextStop(game, path)
         if(nextStop) {
           return [{
-            type: 'move patient towards hospital',
+            type: 'move patient',
             from: route.departure.cityName,
             to: nextStop,
             playerName: game.currentPlayer.name,

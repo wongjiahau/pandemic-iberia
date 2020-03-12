@@ -91,28 +91,28 @@ export const Map: React.FC<{
                 ...city.connectedTo
                   .filter(neighbour => !props.movePatientsPath
                     .some(path => path.from === city.name && path.to === neighbour.name))
-                  .map(neighbour => ({
+                  .map<Relation>(neighbour => ({
                     targetId: getCityId(neighbour.name),
                     targetAnchor: 'middle' as 'middle',
                     sourceAnchor: 'middle' as 'middle',
                     ...(neighbour.cannotBuildRailRoad 
-                      ? { style: { strokeDasharray: '12' } } 
+                      ? { style: { strokeDasharray: '12'} } 
                       : props.railRoads.some(({between: [a, b]}) => 
                           (a === city.name && b === neighbour.name)
                             ||
                           (b === city.name && a === neighbour.name)
                         )
-                        ? {style: {strokeWidth: 16}}
-                        : {style: {strokeWidth: 2}}),
+                        ? {style: {strokeWidth: 16,}}
+                        : {style: {strokeWidth: 2, }}),
                     label: roadLabel(neighbour.name)
                   })),
                 ...props.movePatientsPath
                   .filter(path => path.from === city.name)
                   .map<Relation>(path => ({
                     targetId: getCityId(path.to),
-                    targetAnchor: 'middle' as 'middle',
+                    targetAnchor: 'middle',
                     sourceAnchor: 'middle' as 'middle',
-                    style: {strokeColor: 'red',},
+                    style: {strokeColor: 'red', arrowThickness: 10},
                     label: 
                       <Tooltip arrow title={path.tooltip} >
                         <div className='wiggle' style={{height: '24px', width: '24px', zIndex: 100}} 

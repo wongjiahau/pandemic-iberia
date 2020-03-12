@@ -2,6 +2,7 @@ import React from 'react';
 import { Game } from '../model/game';
 import {Tooltip} from 'react-tippy'
 import { CityCard } from './city-card';
+import { Player } from '../model/player';
 
 export const PlayerCardsInfo: React.FC<{
   playerCards: Game['playerCards'][0],
@@ -10,12 +11,26 @@ export const PlayerCardsInfo: React.FC<{
     tooltip: string
     onClick: () => void
   }
+  highlightPlayer: {
+    tooltip: string
+    onClick: () => void
+  } | undefined
 }> = props => {
   return (
     <div style={{display: 'grid', alignContent: 'start', gridGap: '4px'}}>
-      <div style={{fontWeight: 'bold'}}>
-        {props.playerCards.playerName}
-      </div>
+      <Tooltip
+        key={'highlight-player-' + Boolean(props.highlightPlayer)}
+        arrow
+        open={props.highlightPlayer ? undefined : false}
+        title={props.highlightPlayer?.tooltip}
+        >
+        <div 
+          className={props.highlightPlayer ? 'animated infinite flash' : undefined}
+          style={{fontWeight: 'bold'}} 
+          onClick={props.highlightPlayer?.onClick}>
+          {props.playerCards.playerName}
+        </div>
+      </Tooltip>
       {props.playerCards.cards.map((card, index) => { 
         const {needHighlight, tooltip, onClick} = props.highlightCard(card, index)
         return (

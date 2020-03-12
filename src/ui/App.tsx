@@ -65,10 +65,10 @@ function App() {
 
     const chosenAction = shuffle.pick(possibleActions, { picks: 1 }) as unknown as PlayerAction
     if(chosenAction) {
-      setTimeout(() => {
-        console.log(chosenAction)
-        updateGame(executeAction(chosenAction))
-      }, 500)
+      // setTimeout(() => {
+      //   console.log(chosenAction)
+      //   updateGame(executeAction(chosenAction))
+      // }, 500)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastUpdated])
@@ -211,7 +211,24 @@ function App() {
             <PlayerCardsInfo 
               key={index} 
               playerCards={playerCards}
-              highlightCard={(card, cardIndex) => {
+              highlightPlayer={(() => {
+                const shareKnowledgeAction = 
+                  possibleActions.flatMap(action => 
+                    action.type === 'share knowledge'
+                    &&
+                    action.to === playerCards.playerName
+                    ? [action]
+                    : []
+                  )[0]
+                return shareKnowledgeAction 
+                  ? {
+                    tooltip: `Give "${shareKnowledgeAction.cityName}" from ${shareKnowledgeAction.from} to ${shareKnowledgeAction.to}`,
+                    onClick: () => updateGame(executeAction(shareKnowledgeAction))
+                  }
+                  : undefined
+              })()
+              }
+              highlightCard={(card) => {
                 const discardCardAction = possibleActions.find(
                   action => action.type === 'discard a card'
                   &&

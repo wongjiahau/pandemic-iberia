@@ -29,7 +29,8 @@ export type PlayerAction = {
   direction: 'towards hospital' | 'flee from hospital'
 } | {
   type: 'share knowledge'
-  on: CityName
+  cityName: CityName
+  cityColor: City['color']
   from: Player['name']
   to: Player['name']
 } | {

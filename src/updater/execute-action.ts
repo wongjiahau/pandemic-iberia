@@ -313,6 +313,26 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
           upsert: undefined
         })
       }
+    case 'share knowledge':
+      const updatedGame = 
+        executeAction$({
+          type: 'discard a card',
+          playerName: action.from,
+          cardName: action.cityName
+        })(game)
+
+      return {
+        ...updatedGame,
+        currentPlayer: updateCurrentPlayer(),
+        playerCards: updateArray({
+          array: updatedGame.playerCards,
+          match: ({playerName}) => action.to === playerName,
+          update: ({playerName, cards}) =>
+            ({playerName, cards: [...cards, 
+              {type: 'city' as 'city', cityName: action.cityName, cityColor: action.cityColor}]}),
+          upsert: undefined
+        })
+      }
     default:
       alert(JSON.stringify(action, null, 2))
       throw new Error(`Cannot handle ${action.type} yet`)

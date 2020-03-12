@@ -167,8 +167,37 @@ export const getPossibleActions = ({
         .filter(cityName => cityName !== currentPlayerCity.name)
       : []
 
+  const playersOnTheSamePosition = game.playerPositions
+    .filter(player => player.cityName === currentPlayerCity?.name)
+
+  const playerWithCardOfCurrentCity = 
+  game.playerCards.find(
+    player => player.cards.some(
+      card => card.type === 'city' && card.cityName === currentPlayerCity?.name))
+    ?.playerName
 
   return [
+    ...(playerWithCardOfCurrentCity 
+        && playersOnTheSamePosition
+          .some(player => player.playerName === playerWithCardOfCurrentCity) 
+        && currentPlayerCity
+          ? playersOnTheSamePosition
+            .filter(player => 
+              currentPlayerName === playerWithCardOfCurrentCity
+                ? player.playerName !== currentPlayerName
+                : player.playerName === currentPlayerName
+            )
+            .map(potentialReceiver => {
+              return {
+                type: 'share knowledge' as 'share knowledge',
+                from: playerWithCardOfCurrentCity,
+                to: potentialReceiver.playerName,
+                cityName: currentPlayerCity.name,
+                cityColor: currentPlayerCity.color,
+                playerName: currentPlayerName
+              }
+            })
+          : []),
     ...(currentPlayerCity
       && game.hospitals.some(hospital => hospital.cityName === currentPlayerCity?.name)
       && currentPlayerCards
@@ -207,8 +236,10 @@ export const getPossibleActions = ({
     ...(currentPlayerCity?.isPort 
         ? currentPlayerCards
           .filter(card => 
-            card.type === 'city' && game.cities.find(city => 
-              city.name === card.cityName)?.isPort)
+            card.type === 'city' 
+            && game.cities.find(city => city.name === card.cityName)?.isPort
+            && card.cityName !== currentPlayerCity.name
+          )
           .flatMap<PlayerAction>(card => card.type === 'city'
             ? [{
                 type: 'move',

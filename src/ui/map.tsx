@@ -3,16 +3,18 @@ import { ArcherContainer, ArcherElement, Relation } from 'react-archer';
 import { City, CityName } from '../model/cities';
 import { Game } from '../model/game';
 import {Tooltip} from 'react-tippy'
+import { getRegionId } from '../updater/execute-action';
 
 export const Map: React.FC<{
   cities: City[],
-  adjacentRegions: {
+  regions: {
     cities: City[];
     position: {
         column: number;
         row: number;
     };
   }[],
+  waters: Game['waters']
   hospitals: Game['hospitals']
   railRoads: Game['railRoads']
   infectedCities: Game['infectedCities']
@@ -25,6 +27,11 @@ export const Map: React.FC<{
   highlightedRoads: {
     between: [CityName, CityName]
     onClick: () => void
+    tooltip: string
+  }[]
+  highlightedRegions: {
+    region: CityName[],
+    onClick: () => void,
     tooltip: string
   }[]
   movePatientsPath: {
@@ -176,19 +183,39 @@ export const Map: React.FC<{
           )
         })}
         {/* Render adjacent regions */}
-        {props.adjacentRegions.map((adjacentRegion, index) => (
-          <ArcherElement id={'adjacent-region-' + index} key={index}
-            style={{ gridColumn: adjacentRegion.position.column + 1, gridRow: adjacentRegion.position.row }}
-          >
-            <div
-              onClick={() => {
-                alert(adjacentRegion.cities.map(city => city.name).join(','))
-              }}
+        {props.regions.map((region, index) => { 
+          const highlightedRegions = props.highlightedRegions.filter(region$ => 
+            getRegionId(region$.region) 
+              === 
+            getRegionId(region.cities.map(city => city.name)))
+
+          const waterCount = props.waters
+            .filter(water => 
+              getRegionId(water.affectedCities)
+                ===
+              getRegionId(region.cities.map(city => city.name))
+            )
+            .reduce((total, water) => water.count + total, 0)
+
+          return (
+            <ArcherElement id={'region-' + index} key={index}
+              style={{ gridColumn: region.position.column + 1, gridRow: region.position.row }}
             >
-              <span aria-label='water' role='img'> 🚰 </span>
+              <div>
+                {highlightedRegions.map((action, index) => (
+                  <Tooltip arrow key={index} title={action.tooltip}>
+                    <div onClick={action.onClick} className='wiggle'>
+                      <span aria-label='pipe' role='img'> 🚰 </span>
+                    </div>
+                  </Tooltip>
+                ))}
+                {new Array(waterCount).fill(0).map((_, index) => (
+                  <span aria-label='water' role='img' key={index}> 💧 </span>
+                ))}
               </div>
-          </ArcherElement>
-        ))}
+            </ArcherElement>
+          )
+        })}
       </div>
     </ArcherContainer>
   )

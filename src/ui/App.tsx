@@ -1,7 +1,7 @@
 import React from 'react';
 import 'react-tippy/dist/tippy.css';
 import { infectionCountMarkers } from '../model/game';
-import { getAdjacentRegions } from '../model/get-adjacent-regions';
+import { getRegions } from '../model/get-regions';
 import { setupGame } from '../model/setup-game';
 import { executeAction } from '../updater/execute-action';
 import { getPossibleActions } from '../updater/get-possible-actions';
@@ -20,40 +20,6 @@ import { naivePlayer } from '../ai/naive';
 
 function App() {
   const [game, updateGame] = React.useState(setupGame())
-  const adjecentRegions = [
-    ...getAdjacentRegions(game.cities.map(city => ({
-      name: city.name,
-      connectedTo: city.connectedTo.map(neighbour => neighbour.name)
-    })))
-    .map(region => region.map(name => game.cities.find(city => city.name === name)).filter(notUndefined))
-    .map(region => {
-      const rationalAverage = (xs: number[]) => {
-        const average = Math.round(xs.reduce((sum, x) => x + sum, 0) / xs.length)
-        const min = xs.reduce((min, x) => x < min ? x : min, Number.MAX_SAFE_INTEGER)
-        const max = xs.reduce((max, x) => x > max ? x : max, Number.MIN_SAFE_INTEGER)
-        return average <= min 
-          ? average + 1
-          : (average >= max ? average - 1 : average)
-      }
-      return {
-        cities: region,
-        position: {
-          column: rationalAverage(region.map(({position: {column}}) => column)),
-          row: rationalAverage(region.map(({position: {row}}) => row)),
-        }
-      }
-    }),
-
-    // Missing region that cannot be computed
-    {
-      cities: ['Burgos', 'Soria', 'Zaragoza', 'Madrid', 'Valladolid']
-        .map(cityName => game.cities.find(city => city.name === cityName))
-        .filter(notUndefined)
-        ,
-      position: {column: 12, row: 6}
-    }
-  ]
-
   const possibleActions = getPossibleActions({game})
   const lastUpdated = Date.now()
 
@@ -82,9 +48,10 @@ function App() {
       <Map 
         cities={game.cities} 
         hospitals={game.hospitals}
+        waters={game.waters}
         infectedCities={game.infectedCities} 
         playerPositions={game.playerPositions}
-        adjacentRegions={adjecentRegions}
+        regions={game.regions}
         railRoads={game.railRoads}
         movePatientsPath={possibleActions.flatMap(action => {
           const onClick = () => updateGame(executeAction(action))
@@ -96,6 +63,20 @@ function App() {
                 to: action.to,
                 tooltip: `Move ${action.patientColor} patient from ${action.from} to ${action.to}`
               }]
+            default:
+              return []
+          }
+        })}
+        highlightedRegions={possibleActions.flatMap(action => {
+          const onClick = () => updateGame(executeAction(action))
+          switch(action.type) {
+            case 'purify water':
+              return [{
+                onClick,
+                region: action.affectedCities,
+                tooltip: `Discard ${action.discardedCityCard} to purify a water here.`
+              }]
+
             default:
               return []
           }

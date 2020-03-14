@@ -1,11 +1,11 @@
 const Graph = require('node-dijkstra')
 
-export type AdjacentRegion = string[]
+export type Region = string[]
 
-export const getAdjacentRegions = (nodes: {
+export const getRegions = (nodes: {
   name: string
   connectedTo: string[]
-}[]): AdjacentRegion[] => {
+}[]): Region[] => {
   return nodes.map(node => {
     return node.connectedTo.map(neighbour => {
       const graph = new Graph(
@@ -32,7 +32,7 @@ export const getAdjacentRegions = (nodes: {
   .reduce((a, b) => a.concat(b), [])
   .filter(Boolean)
   .filter(nodes => nodes.length > 2)
-  .map<AdjacentRegion>(region => region.slice().sort())
+  .map<Region>(region => region.slice().sort())
 
   // Remove identical region
   .filter((region, index, regions) => index === regions

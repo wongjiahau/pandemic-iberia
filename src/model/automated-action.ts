@@ -8,6 +8,7 @@ export type AutomatedAction = {
   type: 'infect cities'
   cityName: City['name']
   cubes: City['color'][]
+  affectedByPurifyWater: boolean
 } | {
   type: 'epidemic'
 } | {

@@ -3,6 +3,8 @@ import { InfectionCard, PlayerCard } from './cards';
 import { cities } from "./cities";
 import { Game } from "./game";
 import { allPlayers } from "./player";
+import { getRegions } from './get-regions';
+import { notUndefined } from '../util/not-undefined';
 
 export const setupGame = (): Game => {
   const players = shuffle.pick(allPlayers, {picks: 4})
@@ -89,6 +91,41 @@ export const setupGame = (): Game => {
     researchedDisease: [],
     drawnInfectionCards: [],
     currentOutbreakedCities: [],
-    overrunHospital: undefined
+    overrunHospital: undefined,
+    regions: [
+    ...getRegions(cities.map(city => ({
+      name: city.name,
+      connectedTo: city.connectedTo.map(neighbour => neighbour.name)
+    })))
+    .map(region => region
+      .map(name => cities.find(city => city.name === name))
+      .filter(notUndefined))
+    .map(region => {
+      const rationalAverage = (xs: number[]) => {
+        const average = Math.round(xs.reduce((sum, x) => x + sum, 0) / xs.length)
+        const min = xs.reduce((min, x) => x < min ? x : min, Number.MAX_SAFE_INTEGER)
+        const max = xs.reduce((max, x) => x > max ? x : max, Number.MIN_SAFE_INTEGER)
+        return average <= min 
+          ? average + 1
+          : (average >= max ? average - 1 : average)
+      }
+      return {
+        cities: region,
+        position: {
+          column: rationalAverage(region.map(({position: {column}}) => column)),
+          row: rationalAverage(region.map(({position: {row}}) => row)),
+        }
+      }
+    }),
+
+    // Missing region that cannot be computed
+    {
+      cities: ['Burgos', 'Soria', 'Zaragoza', 'Madrid', 'Valladolid']
+        .map(cityName => cities.find(city => city.name === cityName))
+        .filter(notUndefined)
+        ,
+      position: {column: 12, row: 6}
+    }
+  ]
   }
 }

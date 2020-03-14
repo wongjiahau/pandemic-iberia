@@ -33,6 +33,13 @@ export type Game = {
   railRoads: {
     between: [CityName, CityName]
   }[]
+  regions: {
+      cities: City[];
+      position: {
+          column: number;
+          row: number;
+      };
+  }[]
   waters: {
     count: number
     affectedCities: CityName[]

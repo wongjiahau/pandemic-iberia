@@ -176,7 +176,32 @@ export const getPossibleActions = ({
       card => card.type === 'city' && card.cityName === currentPlayerCity?.name))
     ?.playerName
 
+  const adjacentRegions = game.regions.filter(region => 
+    region.cities.some(city => 
+      city.name === currentPlayerCity?.name))
   return [
+    ...adjacentRegions.flatMap<PlayerAction>(region => {
+      return currentPlayerCards.flatMap<PlayerAction>(card => {
+        switch(card.type) {
+          case 'epidemic':
+            return []
+
+          case 'city': {
+            if(region.cities.map(city => city.color).includes(card.cityColor)) {
+              return [{
+                type: 'purify water',
+                affectedCities: region.cities.map(city => city.name),
+                playerName: game.currentPlayer.name,
+                discardedCityCard: card.cityName
+              }]
+            }
+            else {
+              return []
+            }
+          }
+        }
+      })
+    }),
     ...(playerWithCardOfCurrentCity 
         && playersOnTheSamePosition
           .some(player => player.playerName === playerWithCardOfCurrentCity) 

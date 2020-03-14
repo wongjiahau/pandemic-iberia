@@ -41,9 +41,6 @@ export type PlayerAction = {
   discardedCityCard: CityName
   affectedCities: CityName[]
 } | {
-  type: 'discard card'
-  card: PlayerCard
-} | {
   type: 'set starting position',
   cityName: CityName
 } | {

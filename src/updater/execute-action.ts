@@ -2,7 +2,7 @@ import { updateArray } from './../util/array';
 import { Game, infectionCountMarkers as infectionRateMarkers } from "../model/game";
 import { Action } from "../model/action";
 import shuffle from 'shuffle-array';
-import { City } from '../model/cities';
+import { City, CityName } from '../model/cities';
 
 export const executeAction = (action: Action) => (game: Game): Game => {
   const updatedGame = executeAction$(action)(game)
@@ -130,7 +130,8 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         {
           type: 'infect cities' as 'infect cities', 
           cityName: action.to,
-          cubes: [action.patientColor]
+          cubes: [action.patientColor],
+          affectedByPurifyWater: false
         }
       ])({
         ...game,
@@ -176,7 +177,8 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         return {
           type: 'infect cities',
           cityName: infectionCard.cityName,
-          cubes: [infectionCard.cityColor]
+          cubes: [infectionCard.cityColor],
+          affectedByPurifyWater: true
         }
       }))({
         ...game,
@@ -194,18 +196,59 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         drawnInfectionCards: infectionCards
       }
     }
+    case 'purify water': {
+      return executeAction$({
+        type: 'discard a card',
+        playerName: game.currentPlayer.name,
+        cardName: action.discardedCityCard
+      })({
+        ...game,
+        currentPlayer: updateCurrentPlayer(),
+        waters: [
+          ...game.waters,
+          {
+            affectedCities: action.affectedCities,
+            count: 2
+          }
+        ]
+      })
+    }
     case 'infect cities': {
       const targetCity = game.infectedCities.find(city => city.cityName === action.cityName)
-      const hasHospital = game.hospitals.some(hospital => hospital.cityName === targetCity?.cityName)
+      const relatedWater = game.waters
+        .find(water => water.affectedCities.includes(action.cityName) && water.count > 0)
+
+      if(action.affectedByPurifyWater && relatedWater && action.cubes.length > 0) {
+        return executeAction$({
+          type: 'infect cities',
+          cityName: action.cityName,
+          cubes: action.cubes.slice(1),
+          affectedByPurifyWater: true
+        })({
+          ...game,
+          waters: updateArray({
+            array: game.waters,
+            match: water => 
+              getRegionId(water.affectedCities) 
+              === getRegionId(relatedWater.affectedCities),
+            update: water => ({...water, count: water.count -1}),
+            upsert: undefined
+          })
+        })
+      }
+
+      const hasHospital = game.hospitals
+        .some(hospital => hospital.cityName === targetCity?.cityName)
+
       const crowded = (targetCity?.patients.length ?? 0) === 3
-      if(crowded && hasHospital) {
+      if(crowded && hasHospital && action.cubes.length > 0) {
         return executeAction$({
           type: 'overrun hospital',
           cityName: action.cityName,
           patientColor: action.cubes[0]
         })(game)
       }
-      else if(crowded && !hasHospital) {
+      else if(crowded && !hasHospital && action.cubes.length > 0) {
         return executeAction$({
           type: 'outbreak',
           cityName: action.cityName,
@@ -274,7 +317,8 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
         return executeAction$({
           type: 'infect cities',
           cubes: new Array<City['color']>(3).fill(lastCard.cityColor),
-          cityName: lastCard.cityName
+          cityName: lastCard.cityName,
+          affectedByPurifyWater: true
         })(updatedGame)
       }
     }
@@ -293,7 +337,8 @@ export const executeAction$ = (action: Action) => (game: Game): Game => {
           .map<Action>(neighbour => ({
             type: 'infect cities',
             cubes: [targetCity.color],
-            cityName: neighbour.name
+            cityName: neighbour.name,
+            affectedByPurifyWater: true
           })))({
             ...game,
             outbreakLevel: game.outbreakLevel + 1,
@@ -343,4 +388,8 @@ export const executeActions = (actions: Action[]) => (game: Game) => {
   return actions.reduce((game, action) => {
     return executeAction$(action)(game)
   }, game)
+}
+
+export const getRegionId = (cityNames: CityName[]): string => {
+  return cityNames.slice().sort().join('/')
 }

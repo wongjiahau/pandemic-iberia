@@ -1,7 +1,7 @@
-import { getAdjacentRegions } from './../get-adjacent-regions';
-describe('get-adjacent-region', () => {
+import { getRegions } from '../get-regions';
+describe('get-regions', () => {
   test('case 1', () => {
-    expect(getAdjacentRegions([
+    expect(getRegions([
       { name: 'a', connectedTo: ['b', 'c'] },
       { name: 'b', connectedTo: ['c', 'a'] },
       { name: 'c', connectedTo: ['c', 'a'] }
@@ -12,7 +12,7 @@ describe('get-adjacent-region', () => {
   })
 
   test('case 2', () => {
-    expect(getAdjacentRegions([
+    expect(getRegions([
       { name: 'a', connectedTo: ['b', 'c'] },
       { name: 'b', connectedTo: ['c', 'a', 'd'] },
       { name: 'c', connectedTo: ['c', 'a', 'd'] },
